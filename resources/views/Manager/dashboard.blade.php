@@ -125,10 +125,10 @@
             <div class="table-header">
                 <div class="table-title">Immediate Payments (Today + Next 3 Days)</div>
                 <div class="table-actions">
-                    <a href="{{ route('standard-expenses.index') }}" class="btn btn-outline">
+                    <a href="{{ route('manager.expenses') }}" class="btn btn-outline">
                         <i class="fas fa-list"></i> View All Expenses
                     </a>
-                    <a href="{{ route('non-standard-expenses.index') }}" class="btn btn-primary">
+                    <a href="{{ route('manager.expenses', ['tab' => 'non-standard']) }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Add Expense
                     </a>
                 </div>
@@ -285,7 +285,7 @@
     
     function markAsPaid(expenseId) {
         if (confirm('Mark this expense as paid?')) {
-            fetch(`/manager/standard-expenses/${expenseId}/mark-paid`, {
+            fetch(`/manager/expenses/${expenseId}/mark-paid`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',

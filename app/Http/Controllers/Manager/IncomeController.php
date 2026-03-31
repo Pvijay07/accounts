@@ -1480,6 +1480,27 @@ class IncomeController extends Controller
     ]);
   }
 
+  public function settle($id)
+  {
+    try {
+      $income = Income::findOrFail($id);
+      $income->update([
+        'status' => 'paid',
+        'received_date' => now()->toDateString()
+      ]);
+
+      return response()->json([
+        'success' => true,
+        'message' => 'Income marked as received'
+      ]);
+    } catch (\Exception $e) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Error settling income: ' . $e->getMessage()
+      ], 500);
+    }
+  }
+
   // ========== IMPORT INCOME FROM EXCEL ==========
   public function import(Request $request)
   {

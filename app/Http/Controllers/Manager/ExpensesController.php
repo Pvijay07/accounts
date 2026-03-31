@@ -1557,4 +1557,26 @@ class ExpensesController extends Controller
       ]);
     }
   }
+  public function markPaid($id)
+  {
+    try {
+      $expense = Expense::findOrFail($id);
+      
+      // Update the expense status
+      $expense->update([
+        'status' => 'paid',
+        'paid_date' => now()->toDateString()
+      ]);
+
+      return response()->json([
+        'success' => true,
+        'message' => 'Expense marked as paid'
+      ]);
+    } catch (\Exception $e) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Error marking expense as paid: ' . $e->getMessage()
+      ], 500);
+    }
+  }
 }

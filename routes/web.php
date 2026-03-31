@@ -121,7 +121,9 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
     Route::get('/expenses/summary', [ExpensesController::class, 'getSummary'])->name('manager.expenses.summary');
     Route::get('/expenses/table', [ExpensesController::class, 'getTable'])->name('manager.expenses.table');
     Route::get('/expenses/export', [ExpensesController::class, 'export'])->name('manager.expenses.export');
+    Route::post('/expenses/{id}/mark-paid', [ExpensesController::class, 'markPaid'])->name('manager.expenses.mark-paid');
     Route::get('/expenses/{id}/split-history', [ExpensesController::class, 'splitHistory'])->name('manager.expenses.split');
+    Route::post('/expenses/{id}/settle', [ExpensesController::class, 'markPaid'])->name('manager.expenses.settle');
 
     // Income
     Route::prefix('income')->group(function () {
@@ -130,13 +132,23 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
         Route::get('/export', [IncomeController::class, 'export'])->name('manager.income.export');
         Route::get('/details/{id}', [IncomeController::class, 'getIncomeDetails'])->name('manager.income.details');
         Route::get('/{id}/split-history', [IncomeController::class, 'splitHistory'])->name('manager.income.split');
+        Route::post('/{id}/settle', [IncomeController::class, 'settle'])->name('manager.income.settle');
         Route::get('/upcoming', [IncomeController::class, 'upcoming'])->name('income.upcoming');
         Route::get('/balances', [IncomeController::class, 'balance'])->name('income.balance');
+        Route::post('/send-email', [IncomeController::class, 'sendEmail'])->name('income.send-email');
     });
 
-    // GST Routes
+// GST Routes
     Route::prefix('gst')->group(function () {
         Route::get('/', [GstController::class, 'index'])->name('manager.gst');
+    });
+
+    // Company specific AJAX routes
+    Route::get('/companies/{id}/dues-details', [IncomeController::class, 'companyDuesDetails'])->name('manager.companies.dues-details');
+    Route::get('/companies/{id}/balance-summary', [IncomeController::class, 'balanceSummary'])->name('manager.companies.balance-summary');
+
+    // GST Routes (detailed)
+    Route::prefix('gst-details')->group(function () {
         Route::get('/collected', [GstController::class, 'gstCollected'])->name('manager.gst-collected');
         Route::get('/settlements', [GstController::class, 'settlement'])->name('manager.gst-settlements');
         Route::get('/returns', [GstController::class, 'returns'])->name('manager.gst-returns');
@@ -146,6 +158,7 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
         Route::post('/invoices/filter', [GstController::class, 'filterInvoices'])->name('manager.gst.invoices.filter');
 
         Route::post('/settlement/store', [GstController::class, 'storeSettlement'])->name('manager.gst.settlement.store');
+        Route::post('/settlement/store/legacy', [GstController::class, 'storeSettlement'])->name('manager.settlements.store');
         Route::get('/settlement/{id}', [GstController::class, 'showSettlement'])->name('manager.gst.settlement.show');
         Route::get('/settlement/export', [GstController::class, 'exportSettlements'])->name('manager.gst.settlement.export');
 
@@ -168,6 +181,9 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
         Route::get('/export/{type}', [TDSController::class, 'exportData'])->name('manager.tds.export');
         Route::get('/expense/export/{type}', [TDSController::class, 'exportExpenseData'])->name('manager.tds.expense.export');
         Route::post('/mark-paid/{id}', [TDSController::class, 'markTDSPaid'])->name('manager.tds.mark-paid');
+        Route::get('/download-proof/{id}', [TDSController::class, 'downloadTdsProof'])->name('manager.tds.download-tds-proof');
+        Route::post('/attach-document', [TDSController::class, 'attachTaxProof'])->name('manager.tds.attach-document');
+        Route::delete('/delete-attachment/{id}', [TDSController::class, 'deleteAttachment'])->name('manager.tds.delete-attachment');
     });
 
     // Loans/Advances
