@@ -302,6 +302,11 @@
                                             <i class="fas fa-code-branch"></i>
                                         </button>
                                         @endif
+                                        <button class="btn btn-outline-danger btn-sm ms-1"
+                                            onclick="deleteIncome({{ $income->id }})"
+                                            title="Delete Income">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </td>
@@ -675,12 +680,11 @@
 
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Paid Date</label>
-                                <input type="date" class="form-control" id="editPaidDate" name="received_date"
-                                    required>
+                                <input type="date" class="form-control" id="editPaidDate" name="received_date">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Payment Mode</label>
-                                <select class="form-select" id="editPaymentMode" name="payment_mode" required>
+                                <select class="form-select" id="editPaymentMode" name="payment_mode">
                                     <option value="">Select Mode</option>
                                     <option value="cash">Cash</option>
                                     <option value="bank_transfer">Bank Transfer</option>
@@ -694,7 +698,7 @@
                                 <label class="form-label">Upload Receipts</label>
                                 <div class="input-group">
                                     <input type="file" class="form-control" id="editReceipts" name="receipts[]"
-                                        required multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
+                                        multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
                                     <label class="input-group-text" for="editReceipts">
                                         <i class="fas fa-paperclip"></i>
                                     </label>
@@ -717,8 +721,10 @@
                         <div class="col-md-4 mb-3">
                             <label class="form-label required">Status</label>
                             <select class="form-select" id="editStatus" name="status" required>
+                                <option value="pending">Pending</option>
+                                <option value="received">Received</option>
+                                <option value="overdue">Overdue</option>
                                 <option value="settle">Settle</option>
-                                <option value="due">Due</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -1136,7 +1142,7 @@
                 console.log('Editing income ID:', incomeId);
 
                 const response = await fetch(
-                    `https://xhtmlreviews.in/finance-manager/manager/income/${incomeId}/edit`);
+                    `/manager/income/${incomeId}/edit`);
                 const data = await response.json();
 
                 console.log('API Response:', data);
@@ -1226,8 +1232,8 @@
         const formData = new FormData(this);
         const incomeId = document.getElementById('incomeId').value;
         const url = incomeId ?
-            `https://xhtmlreviews.in/finance-manager/manager/income/${incomeId}` :
-            'https://xhtmlreviews.in/finance-manager/manager/income';
+            `/manager/income/${incomeId}` :
+            '/manager/income';
 
         // Add method spoofing for PUT
         if (incomeId) {
@@ -1320,7 +1326,7 @@
     async function openReceivePaymentModal(incomeId) {
         try {
             const response = await fetch(
-                `https://xhtmlreviews.in/finance-manager/manager/income/${incomeId}/details`);
+                `/manager/income/${incomeId}/details`);
             const data = await response.json();
 
             if (data.success) {
@@ -1448,7 +1454,7 @@
         const createNewProforma = document.getElementById('createNewProforma').checked ? 1 : 0;
         formData.set('create_new_proforma', createNewProforma); // Override the string value
 
-        fetch(`https://xhtmlreviews.in/finance-manager/manager/income/${incomeId}/receive-payment`, {
+        fetch(`/manager/income/${incomeId}/receive-payment`, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -1489,6 +1495,32 @@
             });
     });
     // Handle income form submission
+
+    // Delete Income
+    function deleteIncome(incomeId) {
+        if (confirm('Are you sure you want to delete this income? This action cannot be undone.')) {
+            fetch(`/manager/income/${incomeId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('success', data.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification('error', data.message || 'Error deleting income');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('error', 'Failed to delete income');
+            });
+        }
+    }
 
     // Helper function to show notifications
     function showNotification(type, message) {
@@ -1786,7 +1818,7 @@
             console.log('Opening edit modal for income ID:', incomeId);
 
             const response = await fetch(
-                `https://xhtmlreviews.in/finance-manager/manager/income/${incomeId}/edit`
+                `/manager/income/${incomeId}/edit`
             );
             const data = await response.json();
 
@@ -2041,7 +2073,7 @@
     async function viewSplitHistory(expenseId) {
         try {
             const response = await fetch(
-                `https://xhtmlreviews.in/finance-manager/manager/income/${expenseId}/split-history`);
+                `/manager/income/${expenseId}/split-history`);
             const data = await response.json();
 
             const splitHistoryContent = document.getElementById('splitHistoryContent');
@@ -2358,7 +2390,7 @@
         }
 
         const formData = new FormData(this);
-        const url = `https://xhtmlreviews.in/finance-manager/manager/income/${incomeId}`;
+        const url = `/manager/income/${incomeId}`;
 
         // Show loading state
         const submitBtn = document.getElementById('editSubmitBtn');
@@ -2432,7 +2464,7 @@
 
         try {
             const response = await fetch(
-                `https://xhtmlreviews.in/finance-manager/manager/receipts/${receiptId}`, {
+                `/manager/receipts/${receiptId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute(
@@ -2486,7 +2518,7 @@
     function viewProforma(id) {
         console.log('Fetching invoice data for ID:', id);
 
-        fetch(`https://xhtmlreviews.in/finance-manager/manager/getIncome/${id}`)
+        fetch(`/manager/getIncome/${id}`)
             .then(response => {
                 console.log('Response status:', response.status);
                 if (!response.ok) {
@@ -2781,13 +2813,13 @@
 
     function downloadProforma(id) {
         // First get the invoice_id from income
-        fetch(`https://xhtmlreviews.in/finance-manager/manager/getIncome/${id}`)
+        fetch(`/manager/getIncome/${id}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.income && data.income.invoice_id) {
                     // Use the invoice_id to download
                     window.open(
-                        `https://xhtmlreviews.in/finance-manager/admin/income/${data.income.invoice_id}/download`,
+                        `/admin/income/${data.income.invoice_id}/download`,
                         '_blank');
                 } else {
                     alert('No invoice found for this income');
@@ -2814,7 +2846,7 @@
                 // Fetch income and invoice details
                 try {
                     const response = await fetch(
-                        `https://xhtmlreviews.in/finance-manager/manager/getIncome/${incomeId}`);
+                        `/manager/getIncome/${incomeId}`);
                     const data = await response.json();
 
                     if (data.success && data.invoice) {

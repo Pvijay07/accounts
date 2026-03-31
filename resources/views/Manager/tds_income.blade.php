@@ -17,41 +17,33 @@
             </div>
 
             <!-- Summary Cards -->
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-4">
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Tax Period</div>
-                            <div class="value">{{ date('F Y', strtotime($period . '-01')) }}</div>
-                            <div class="small-help">Currently viewing</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Tax Period</div>
+                        <div class="kpi-value">{{ date('F Y', strtotime($period . '-01')) }}</div>
+                        <div class="small-help">Currently viewing</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Total Output TDS</div>
-                            <div class="value">₹ {{ number_format($totalOutputTDS, 2) }}</div>
-                            <div class="small-help">From invoices</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Output TDS</div>
+                        <div class="kpi-value">₹ {{ number_format($totalOutputTDS, 2) }}</div>
+                        <div class="small-help">From invoices</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Taxable Amount</div>
-                            <div class="value">₹ {{ number_format($totalTaxableAmount, 2) }}</div>
-                            <div class="small-help">Base amount before TDS</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Taxable Amount</div>
+                        <div class="kpi-value">₹ {{ number_format($totalTaxableAmount, 2) }}</div>
+                        <div class="small-help">Base amount before TDS</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Attachments</div>
-                            <div class="value"></div>
-                            <div class="small-help">PDFs for CA</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Attachments</div>
+                        <div class="kpi-value">-</div>
+                        <div class="small-help">PDFs for CA</div>
                     </div>
                 </div>
             </div>
@@ -397,7 +389,7 @@
             attachmentsList.innerHTML =
                 '<div class="text-center py-3"><i class="fas fa-spinner fa-spin"></i> Loading attachments...</div>';
 
-            fetch(`{{ url('https://xhtmlreviews.in/finance-manager/manager/tds/attachments') }}/${invoiceId}`)
+            fetch(`{{ url('/manager/tds/attachments') }}/${invoiceId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.attachments && data.attachments.length > 0) {
@@ -557,7 +549,7 @@ async function downloadTdsProofById(taxId) {
 
     try {
         // Create download URL - FIXED: Use correct route
-        const downloadUrl = `https://xhtmlreviews.in/finance-manager/manager/taxes/${taxId}/download-tds-proof`;
+        const downloadUrl = `/manager/taxes/${taxId}/download-tds-proof`;
         
         // Create temporary iframe
         const iframe = document.createElement('iframe');
@@ -618,7 +610,7 @@ async function downloadTdsProofById(taxId) {
 
 // Alternative using direct link click
 function downloadTdsProofById(taxId) {
-    const downloadUrl = `https://xhtmlreviews.in/finance-manager/manager/taxes/${taxId}/download-tds-proof`;
+    const downloadUrl = `/manager/taxes/${taxId}/download-tds-proof`;
     
     // Create a temporary link and click it
     const link = document.createElement('a');
@@ -636,7 +628,7 @@ function downloadTdsProofDirect(taxId) {
     event.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     event.target.disabled = true;
 
-    fetch(`{{ url('https://xhtmlreviews.in/finance-manager/manager/taxes') }}/${taxId}/download-tds-proof`, {
+    fetch(`{{ url('/manager/taxes') }}/${taxId}/download-tds-proof`, {
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
         }

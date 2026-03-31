@@ -22,41 +22,33 @@
             </div>
 
             <!-- Summary Cards -->
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-4">
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Tax Period</div>
-                            <div class="value">{{ date('M Y', strtotime($selectedPeriod)) }}</div>
-                            <div class="small-help">Currently viewing</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Tax Period</div>
+                        <div class="kpi-value">{{ date('M Y', strtotime($selectedPeriod)) }}</div>
+                        <div class="small-help">Currently viewing</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">GST Collected</div>
-                            <div class="value">₹ {{ number_format($totalGSTCollected, 2) }}</div>
-                            <div class="small-help">From {{ $gstTaxes->count() }} income records</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">GST Collected</div>
+                        <div class="kpi-value">₹ {{ number_format($totalGSTCollected, 2) }}</div>
+                        <div class="small-help">From {{ $gstTaxes->count() }} records</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">TDS Collected</div>
-                            <div class="value">₹ {{ number_format($totalTDSCollected, 2) }}</div>
-                            <div class="small-help">From {{ $tdsTaxes->count() }} income records</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">TDS Collected</div>
+                        <div class="kpi-value">₹ {{ number_format($totalTDSCollected, 2) }}</div>
+                        <div class="small-help">From {{ $tdsTaxes->count() }} records</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Taxable Amount</div>
-                            <div class="value">₹ {{ number_format($totalTaxableAmount, 2) }}</div>
-                            <div class="small-help">Base amount before tax</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Taxable Amount</div>
+                        <div class="kpi-value">₹ {{ number_format($totalTaxableAmount, 2) }}</div>
+                        <div class="small-help">Base amount before tax</div>
                     </div>
                 </div>
             </div>

@@ -1616,12 +1616,17 @@
                 if (confirm('Are you sure you want to delete this category?')) {
                     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                    fetch(`https://xhtmlreviews.in/finance-manager/admin/categories/${categoryId}`, {
-                            method: 'DELETE',
+                    fetch(`{{ route('admin.categories.destroy', '__ID__') }}`.replace('__ID__', categoryId), {
+                            method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': csrfToken,
                                 'Accept': 'application/json'
-                            }
+                            },
+                            body: (() => {
+                                const formData = new FormData();
+                                formData.append('_method', 'DELETE');
+                                return formData;
+                            })()
                         })
                         .then(response => response.json())
                         .then(data => {

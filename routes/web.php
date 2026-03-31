@@ -56,8 +56,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/expensetypes', [ExpenseTypeController::class, 'index'])->name('expensetypes');
         Route::post('/expensetypes', [ExpenseTypeController::class, 'store'])->name('expensetypes.store');
 
-        Route::get('expensetypes/{id}/edit', [ExpenseTypeController::class, 'edit'])->name('admin.expensetypes.edit');
-        Route::put('expensetypes/{id}', [ExpenseTypeController::class, 'update'])->name('admin.expensetypes.update');
+        Route::get('expensetypes/{id}/edit', [ExpenseTypeController::class, 'edit'])->name('expensetypes.edit');
+        Route::put('expensetypes/{id}', [ExpenseTypeController::class, 'update'])->name('expensetypes.update');
 
         Route::get('/standard-expenses', [StandardExpensesController::class, 'index'])->name('standard-expenses');
         Route::post('/standard-expenses/store', [StandardExpensesController::class, 'store'])->name('standard-expenses.store');
@@ -66,8 +66,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('/standard-expenses/{id}', [StandardExpensesController::class, 'destroy'])->name('standard-expenses.destroy');
         Route::post('/generate-expenses', [StandardExpensesController::class, 'generateExpenses'])->name('generate-expenses');
         Route::post('/standard-expenses/get-categories', [StandardExpensesController::class, 'getCategories'])->name('standard-expenses.get-categories');
-        Route::get('/standard-expenses/{id}/taxes', [StandardExpensesController::class, 'getTaxDetails']);
-        Route::post('/taxes/{id}/pay', [StandardExpensesController::class, 'markTaxAsPaid']);
+        Route::get('/standard-expenses/{id}/taxes', [StandardExpensesController::class, 'getTaxDetails'])->name('standard-expenses.taxes');
+        Route::post('/taxes/{id}/pay', [StandardExpensesController::class, 'markTaxAsPaid'])->name('taxes.pay');
         Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs');
 
         Route::prefix('invoices')->group(function () {
@@ -83,10 +83,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/invoices/{id}/edit', [InvoiceManagementController::class, 'edit'])->name('invoices.edit');
 
 
-        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
-        Route::get('/activity-logs/{id}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
-        Route::post('/activity-logs/clear', [ActivityLogController::class, 'clear'])->name('activity-logs.clear');
         Route::get('/activity-logs/export', [ActivityLogController::class, 'export'])->name('activity-logs.export');
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::post('/activity-logs/clear', [ActivityLogController::class, 'clear'])->name('activity-logs.clear');
+        Route::get('/activity-logs/{id}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('users');
@@ -94,6 +94,7 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
 
             Route::put('/{id}', [UserController::class, 'update'])->name('users.update');
+            Route::put('/{id}/status', [UserController::class, 'updateStatus'])->name('users.status');
             Route::delete('/{id}', [UserController::class, 'destroy'])->name('users.destroy');
             Route::post('/role-permissions', [UserController::class, 'saveRolePermissions'])->name('users.role-permissions');
             Route::get('/role-permissions/{role}', [UserController::class, 'getUserPermissions'])->name('users.get-role-permissions');
@@ -109,6 +110,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/system-settings/clear-logs', [SystemSettingsController::class, 'clearLogs'])->name('settings.clear-logs');
 
         Route::post('/categories/save', [CategoryController::class, 'store'])->name('categories.store');
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
         Route::post('/categories/assign', [CategoryController::class, 'assign'])
             ->name('categories.assign');
         Route::post('/categories/bulk-update', [CategoryController::class, 'bulkUpdate'])->name('categories.bulk-update');

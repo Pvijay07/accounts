@@ -18,41 +18,33 @@
             </div>
 
             <!-- Summary Cards -->
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-4">
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Tax Period</div>
-                            <div class="value">{{ date('F Y', strtotime($selectedPeriod . '-01')) }}</div>
-                            <div class="small-help">Currently viewing</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Tax Period</div>
+                        <div class="kpi-value">{{ date('F Y', strtotime($selectedPeriod . '-01')) }}</div>
+                        <div class="small-help">Currently viewing</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Total Input TDS</div>
-                            <div class="value">₹ {{ number_format($totalTDSAmount, 2) }}</div>
-                            <div class="small-help">From purchase bills</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Input TDS</div>
+                        <div class="kpi-value">₹ {{ number_format($totalTDSAmount, 2) }}</div>
+                        <div class="small-help">From purchase bills</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Taxable Amount</div>
-                            <div class="value">₹ {{ number_format($totalTaxableAmount, 2) }}</div>
-                            <div class="small-help">Base amount before TDS</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Taxable Amount</div>
+                        <div class="kpi-value">₹ {{ number_format($totalTaxableAmount, 2) }}</div>
+                        <div class="small-help">Base amount before TDS</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Attachments</div>
-                            <div class="value"></div>
-                            <div class="small-help">Bills for CA</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Attachments</div>
+                        <div class="kpi-value">-</div>
+                        <div class="small-help">Bills for CA</div>
                     </div>
                 </div>
             </div>
@@ -522,7 +514,7 @@
         }
 
         function downloadTdsProofById(id) {
-            window.location.href = `https://xhtmlreviews.in/finance-manager/manager/taxes/${id}/download-tds-proof`;
+            window.location.href = `/manager/taxes/${id}/download-tds-proof`;
         }
     </script>
 @endsection

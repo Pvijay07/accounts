@@ -77,12 +77,12 @@ class Expense extends Model
     // Scopes
     public function scopeStandard($query)
     {
-        return $query->where('type', 'standard');
+        return $query->where('source', 'standard');
     }
 
     public function scopeNonStandard($query)
     {
-        return $query->where('type', 'non_standard');
+        return $query->where('source', 'manual');
     }
 
     public function scopePending($query)

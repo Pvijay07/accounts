@@ -152,8 +152,8 @@ public function index(Request $request)
       }
 
       // Delete logo if exists
-      if ($company->logo) {
-        Storage::disk('public')->delete($company->logo);
+      if ($company->logo_path) {
+        Storage::disk('public')->delete($company->logo_path);
       }
 
       $company->delete();
@@ -217,16 +217,16 @@ public function index(Request $request)
   {
     if ($request->hasFile('logo')) {
       // Delete old logo if exists
-      if ($company && $company->logo) {
-        Storage::disk('public')->delete($company->logo);
+      if ($company && $company->logo_path) {
+        Storage::disk('public')->delete($company->logo_path);
       }
 
-      $logoPath          = $request->file('logo')->store('company-logos', 'public');
-      $validated['logo'] = $logoPath;
+      $logoPath               = $request->file('logo')->store('company-logos', 'public');
+      $validated['logo_path'] = $logoPath;
     } elseif ($request->has('remove_logo') && $request->remove_logo) {
-      if ($company && $company->logo) {
-        Storage::disk('public')->delete($company->logo);
-        $validated['logo'] = null;
+      if ($company && $company->logo_path) {
+        Storage::disk('public')->delete($company->logo_path);
+        $validated['logo_path'] = null;
       }
     }
 

@@ -349,7 +349,7 @@
             
             if (type === 'company') {
                 document.getElementById('quickSettleTitle').textContent = 'Settle Company Dues';
-                fetch(`https://xhtmlreviews.in/finance-manager/manager/companies/${id}/dues-details`)
+                fetch(`/manager/companies/${id}/dues-details`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
@@ -390,7 +390,7 @@
         });
 
         function loadCompanyDuesDetails(companyId, container) {
-            fetch(`https://xhtmlreviews.in/finance-manager/manager/companies/${companyId}/dues-details`)
+            fetch(`/manager/companies/${companyId}/dues-details`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -450,7 +450,7 @@
 
         function settleIncome(incomeId) {
             if (confirm('Mark this income as received?')) {
-                fetch(`https://xhtmlreviews.in/finance-manager/manager/incomes/${incomeId}/settle`, {
+                fetch(`/manager/incomes/${incomeId}/settle`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'

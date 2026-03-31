@@ -115,6 +115,32 @@ class UserController extends Controller
     ]);
   }
 
+  public function updateStatus(Request $request, $id)
+  {
+    $request->validate([
+      'status' => 'required|in:active,inactive',
+    ]);
+
+    $user = User::findOrFail($id);
+
+    if ($user->id === auth()->id() && $request->status === 'inactive') {
+      return response()->json([
+        'success' => false,
+        'message' => 'You cannot deactivate your own account while you are signed in.'
+      ], 403);
+    }
+
+    $user->update([
+      'status' => $request->status,
+    ]);
+
+    return response()->json([
+      'success' => true,
+      'message' => 'User status updated successfully!',
+      'user' => $user,
+    ]);
+  }
+
   public function destroy($id)
   {
     $user = User::findOrFail($id);

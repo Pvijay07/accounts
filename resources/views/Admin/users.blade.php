@@ -312,7 +312,7 @@
         }
 
         function editUser(userId) {
-            fetch(`https://xhtmlreviews.in/finance-manager/admin/users/${userId}/edit`)
+            fetch(`{{ route('admin.users.edit', '__ID__') }}`.replace('__ID__', userId))
                 .then(response => response.json())
                 .then(user => {
                     console.log(user)
@@ -372,7 +372,7 @@
             permissionsDiv.innerHTML = '';
 
             // Get role's default permissions
-            fetch(`/users/role-permissions/${role}`)
+            fetch(`{{ route('admin.users.get-role-permissions', '__ROLE__') }}`.replace('__ROLE__', role))
                 .then(response => response.json())
                 .then(data => {
                     const rolePermissions = data.permissions || [];
@@ -410,10 +410,13 @@
 
             const formData = new FormData(this);
             const userId = document.getElementById('userId').value;
-            const url = userId ? `https://xhtmlreviews.in/finance-manager/admin/users/${userId}` :
+            const url = userId ? `{{ route('admin.users.update', '__ID__') }}`.replace('__ID__', userId) :
                 "{{ route('admin.users.store') }}";
-            const method = userId ? 'PUT' : 'POST';
             const actionType = userId ? 'updated' : 'created';
+
+            if (userId) {
+                formData.append('_method', 'PUT');
+            }
 
             const permissions = [];
             document.querySelectorAll('input[name="permissions[]"]:checked').forEach(cb => {
@@ -422,7 +425,7 @@
             formData.set('permissions', JSON.stringify(permissions));
 
             fetch(url, {
-                    method: method,
+                    method: 'POST',
                     body: formData,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -463,15 +466,17 @@
             const action = newStatus === 'active' ? 'activated' : 'deactivated';
 
             if (confirm(`Are you sure you want to ${newStatus === 'active' ? 'activate' : 'deactivate'} this user?`)) {
-                fetch(`https://xhtmlreviews.in/finance-manager/admin/users/${userId}/status`, {
-                        method: 'PUT',
+                fetch(`{{ route('admin.users.status', '__ID__') }}`.replace('__ID__', userId), {
+                        method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         },
-                        body: JSON.stringify({
-                            status: newStatus
-                        })
+                        body: (() => {
+                            const formData = new FormData();
+                            formData.append('_method', 'PUT');
+                            formData.append('status', newStatus);
+                            return formData;
+                        })()
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -492,11 +497,16 @@
 
         function deleteUser(userId) {
             if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-                fetch(`https://xhtmlreviews.in/finance-manager/admin/users/${userId}`, {
-                        method: 'DELETE',
+                fetch(`{{ route('admin.users.destroy', '__ID__') }}`.replace('__ID__', userId), {
+                        method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        }
+                        },
+                        body: (() => {
+                            const formData = new FormData();
+                            formData.append('_method', 'DELETE');
+                            return formData;
+                        })()
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -519,7 +529,7 @@
         function loadRolePermissions() {
             const role = document.getElementById('role-select').value;
 
-            fetch(`https://xhtmlreviews.in/finance-manager/admin/users/role-permissions/${role}`)
+            fetch(`{{ route('admin.users.get-role-permissions', '__ROLE__') }}`.replace('__ROLE__', role))
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('permissions-container');
@@ -663,7 +673,7 @@
                 permissions.push(cb.value);
             });
 
-            fetch('https://xhtmlreviews.in/finance-manager/admin/users/role-permissions', {
+            fetch('{{ route('admin.users.role-permissions') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

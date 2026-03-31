@@ -19,19 +19,24 @@ class Income extends Model
     'invoice_id',
     'import_method',
     'income_date',
+    'due_date',
     'status',
     'tax_type',
     'actual_amount',
+    'balance_amount',
     'party_name',
     'frequency',
     'due_day',
     'mail_status',
     'created_by',
     'notes',
+    'conversion_cost',
+    'conversion_rate_percentage',
     'client_details',
     'line_items',
     'parent_id',
-    'invoice_number'
+    'invoice_number',
+    'schedule_amount'
   ];
 
   protected $casts = [

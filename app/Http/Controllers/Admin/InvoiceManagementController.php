@@ -284,14 +284,14 @@ class InvoiceManagementController extends Controller
         'company_id'                 => $request->company_id,
         'type'                       => 'credit',
         'payment_number'             => 'UP-' . str_pad(UpcomingPayment::count() + 1, 3, '0', STR_PAD_LEFT),
+        'item_name'                  => $invoiceNumber,
+        'party_name'                 => $request->client_name,
         'amount'                     => $receivableAmount, // Use receivable amount
-        'currency'                   => 'INR',
         'due_date'                   => $request->due_date,
+        'source'                     => 'income',
         'status'                     => 'pending',
         'description'                => $request->purpose_comment,
         'client_details'             => json_encode($clientDetails),
-        'conversion_cost'            => $conversionCost, // Add conversion cost
-        'conversion_rate_percentage' => $request->conversion_rate_percentage ?? 0,
       ]);
 
       DB::commit();

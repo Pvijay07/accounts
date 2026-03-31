@@ -77,7 +77,7 @@ class StandardExpensesController extends Controller
       'gst_amount'           => 'nullable|numeric|min:0',
       'gst_amount_paid'      => 'nullable|numeric|min:0',
       'gst_paid_date'        => 'nullable|date',
-      'gst_payment_status'   => 'nullable|in:pending,partially_paid,paid',
+      'gst_payment_status'   => 'nullable|in:received,not_received',
       'gst_payment_notes'    => 'nullable|string|max:500',
       'gst_payment_reference' => 'nullable|string|max:255',
 
@@ -87,7 +87,7 @@ class StandardExpensesController extends Controller
       'tds_amount'           => 'nullable|numeric|min:0',
       'tds_amount_paid'      => 'nullable|numeric|min:0',
       'tds_paid_date'        => 'nullable|date',
-      'tds_payment_status'   => 'nullable|in:pending,partially_paid,paid',
+      'tds_payment_status'   => 'nullable|in:received,not_received',
       'tds_payment_notes'    => 'nullable|string|max:500',
       'tds_payment_reference' => 'nullable|string|max:255'
     ]);
@@ -275,40 +275,34 @@ class StandardExpensesController extends Controller
   private function updateExpensePaymentStatus($expense)
   {
     $totalTaxAmount = $expense->taxes->sum('tax_amount');
-    $totalTaxPaid = $expense->taxes->sum('amount_paid');
+    $status = 'upcoming';
 
     if ($totalTaxAmount == 0) {
-      // No taxes, check main payment
-      $mainAmount = $expense->actual_amount;
-      $mainPaid = $expense->amount_paid ?? 0;
+      $mainAmount = (float) ($expense->actual_amount ?? 0);
+      $mainPaid = (float) ($expense->partial_paid ?? 0);
 
-      if ($mainPaid >= $mainAmount) {
-        $expense->update(['payment_status' => 'paid', 'status' => 'paid']);
+      if ($mainAmount > 0 && $mainPaid >= $mainAmount) {
+        $status = 'paid';
       } elseif ($mainPaid > 0) {
-        $expense->update(['payment_status' => 'partially_paid', 'status' => 'pending']);
-      } else {
-        $expense->update(['payment_status' => 'pending', 'status' => 'pending']);
+        $status = 'pending';
       }
     } else {
-      // Check tax payments
       $allTaxesPaid = $expense->taxes->every(function ($tax) {
-        return $tax->payment_status == 'paid';
+        return $tax->payment_status === 'received';
+      });
+
+      $someTaxesPaid = $expense->taxes->contains(function ($tax) {
+        return $tax->payment_status === 'received' && (float) $tax->amount_paid > 0;
       });
 
       if ($allTaxesPaid) {
-        $expense->update(['payment_status' => 'paid', 'status' => 'paid']);
-      } else {
-        $someTaxesPaid = $expense->taxes->contains(function ($tax) {
-          return in_array($tax->payment_status, ['paid', 'partially_paid']);
-        });
-
-        if ($someTaxesPaid) {
-          $expense->update(['payment_status' => 'partially_paid', 'status' => 'pending']);
-        } else {
-          $expense->update(['payment_status' => 'pending', 'status' => 'pending']);
-        }
+        $status = 'paid';
+      } elseif ($someTaxesPaid) {
+        $status = 'pending';
       }
     }
+
+    $expense->update(['status' => $status]);
   }
 
   public function show($id)
@@ -505,25 +499,11 @@ class StandardExpensesController extends Controller
   public function destroy($id)
   {
     try {
-      $template = Expense::where('is_template', true)->findOrFail($id);
-
-      // Check if template is used in any actual expenses
-      $usedInExpenses = Expense::where('expense_type_id', $id)
-        ->orWhere(function ($query) use ($template) {
-          $query->where('template_name', $template->template_name)
-            ->where('company_id', $template->company_id);
-        })
-        ->where('is_template', false)
-        ->exists();
-
-      if ($usedInExpenses) {
-        return redirect()->back()
-          ->with('error', 'Cannot delete template. It is used in existing expenses.');
-      }
-
+      $template = Expense::where('source', 'standard')->findOrFail($id);
+      $template->taxes()->delete();
       $template->delete();
 
-      return redirect()->route('admin.standard-expenses.index')
+      return redirect()->route('admin.standard-expenses')
         ->with('success', 'Template deleted successfully');
     } catch (\Exception $e) {
       return redirect()->back()
@@ -738,11 +718,9 @@ class StandardExpensesController extends Controller
 
       // Update payment status
       if ($request->amount_paid >= $tax->tax_amount) {
-        $tax->update(['payment_status' => 'paid']);
-      } elseif ($request->amount_paid > 0) {
-        $tax->update(['payment_status' => 'partially_paid']);
+        $tax->update(['payment_status' => 'received']);
       } else {
-        $tax->update(['payment_status' => 'pending']);
+        $tax->update(['payment_status' => 'not_received']);
       }
 
       // Update expense status

@@ -621,7 +621,7 @@
             // Load Company Data for Edit
             function loadCompanyData(companyId) {
                 $.ajax({
-                    url: `https://xhtmlreviews.in/finance-manager/admin/companies/${companyId}/edit`,
+                    url: `{{ route('admin.companies.edit', '__ID__') }}`.replace('__ID__', companyId),
                     method: 'GET',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken

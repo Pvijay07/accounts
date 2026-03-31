@@ -912,7 +912,7 @@
         // Show loading
         categorySelect.innerHTML = '<option value="">Loading categories...</option>';
 
-        fetch('https://xhtmlreviews.in/finance-manager/admin/standard-expenses/get-categories', {
+        fetch('{{ route('admin.standard-expenses.get-categories') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1323,14 +1323,14 @@
 
             // Load expense data
             const expenseResponse = await fetch(
-                `https://xhtmlreviews.in/finance-manager/admin/standard-expenses/${id}`);
+                `{{ route('admin.standard-expenses.show', '__ID__') }}`.replace('__ID__', id));
             const expenseData = await expenseResponse.json();
 
             // Load tax data
             let taxData = {};
             try {
                 const taxResponse = await fetch(
-                    `https://xhtmlreviews.in/finance-manager/admin/standard-expenses/${id}/taxes`);
+                    `{{ route('admin.standard-expenses.taxes', '__ID__') }}`.replace('__ID__', id));
                 if (taxResponse.ok) {
                     taxData = await taxResponse.json();
                 }
@@ -1546,7 +1546,7 @@
         // Set form action
         const form = document.getElementById('editTemplateForm');
         if (form) {
-            form.action = `https://xhtmlreviews.in/finance-manager/admin/standard-expenses/${id}`;
+            form.action = `{{ route('admin.standard-expenses.update', '__ID__') }}`.replace('__ID__', id);
         }
 
         // Set category dropdown
@@ -1668,7 +1668,7 @@
 
         categorySelect.innerHTML = '<option value="">Loading categories...</option>';
 
-        fetch('https://xhtmlreviews.in/finance-manager/admin/standard-expenses/get-categories', {
+        fetch('{{ route('admin.standard-expenses.get-categories') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

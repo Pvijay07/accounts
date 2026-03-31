@@ -24,50 +24,42 @@
             </div>
 
             <!-- Dashboard Cards -->
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-4">
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Tax Period</div>
-                            <div class="value fw-bold">{{ $currentPeriod }}</div>
-                            <div class="small-help">Filter by company/period.</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Tax Period</div>
+                        <div class="kpi-value">{{ $currentPeriod }}</div>
+                        <div class="small-help">Filter by company/period.</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Output GST</div>
-                            <div class="value fw-bold" id="kpi_output">₹ {{ number_format($totalOutputGST, 2) }}</div>
-                            <div class="small-help">GST from sales/income.</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Output GST</div>
+                        <div class="kpi-value" id="kpi_output">₹ {{ number_format($totalOutputGST, 2) }}</div>
+                        <div class="small-help">GST from sales/income.</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Input GST (ITC)</div>
-                            <div class="value fw-bold" id="kpi_itc">₹ {{ number_format($totalInputGST, 2) }}</div>
-                            <div class="small-help">GST on purchases/expenses.</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Input GST (ITC)</div>
+                        <div class="kpi-value" id="kpi_itc">₹ {{ number_format($totalInputGST, 2) }}</div>
+                        <div class="small-help">GST on purchases/expenses.</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card kpi shadow-sm">
-                        <div class="card-body">
-                            <div class="label">Net GST Payable</div>
-                            <div class="value fw-bold" id="kpi_net">
-                                ₹ {{ number_format($netGSTPayable, 2) }}
-                                @if ($netGSTPayable < 0)
-                                    <span class="badge bg-success ms-1">Receivable</span>
-                                @elseif($netGSTPayable > 0)
-                                    <span class="badge bg-warning ms-1">Payable</span>
-                                @else
-                                    <span class="badge bg-secondary ms-1">Balanced</span>
-                                @endif
-                            </div>
-                            <div class="small-help">Output − Input GST</div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Net GST Payable</div>
+                        <div class="kpi-value" id="kpi_net">
+                            ₹ {{ number_format($netGSTPayable, 2) }}
+                            @if ($netGSTPayable < 0)
+                                <span class="badge bg-success ms-1">Receivable</span>
+                            @elseif($netGSTPayable > 0)
+                                <span class="badge bg-warning ms-1">Payable</span>
+                            @else
+                                <span class="badge bg-secondary ms-1">Balanced</span>
+                            @endif
                         </div>
+                        <div class="small-help">Output − Input GST</div>
                     </div>
                 </div>
             </div>

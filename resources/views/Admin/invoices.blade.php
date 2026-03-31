@@ -2846,7 +2846,7 @@ window.calculateTax = function() {
 
         // View proforma function
         function viewProforma(id) {
-            fetch(`https://xhtmlreviews.in/finance-manager/admin/invoices/${id}`)
+            fetch(`{{ route('admin.invoices.details', '__ID__') }}`.replace('__ID__', id))
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -3039,11 +3039,11 @@ window.calculateTax = function() {
 
         // Download functions
         function downloadProforma(id) {
-            window.open(`https://xhtmlreviews.in/finance-manager/admin/invoices/${id}/download?type=proforma`, '_blank');
+            window.open(`{{ route('admin.invoices.download', '__ID__') }}`.replace('__ID__', id) + '?type=proforma', '_blank');
         }
 
         function downloadInvoice(id) {
-            window.open(`https://xhtmlreviews.in/finance-manager/admin/invoices/${id}/download?type=invoice`, '_blank');
+            window.open(`{{ route('admin.invoices.download', '__ID__') }}`.replace('__ID__', id) + '?type=invoice', '_blank');
         }
 
         // Print invoice
@@ -3603,7 +3603,7 @@ window.calculateTax = function() {
     </style>
     <script>
         function openEditInvoiceModal(invoiceId) {
-            fetch(`https://xhtmlreviews.in/finance-manager/admin/invoices/${invoiceId}/edit`)
+            fetch(`{{ route('admin.invoices.edit', '__ID__') }}`.replace('__ID__', invoiceId))
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -4053,7 +4053,7 @@ window.calculateTax = function() {
 
                     // Use the form's action attribute which should already be set
                     const updateUrl =
-                        `https://xhtmlreviews.in/finance-manager/admin/invoices/${invoiceId}/update`;
+                        `{{ route('admin.invoices.update', '__ID__') }}`.replace('__ID__', invoiceId);
                     console.log('Update URL:', updateUrl);
 
                     // Prepare form data

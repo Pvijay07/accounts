@@ -57,11 +57,10 @@ class SystemSettingsController extends Controller
       ->get();
 
 
-    // Get settings (you can store these in database or config)
-    $settings = [
+    $settings = array_merge($settings, [
       'auto_create_cycle_expenses' => true,
       'allow_additional_expenses' => true,
-    ];
+    ]);
     return view('Admin.system_settings', compact(
       'settings',
       'taxRates',

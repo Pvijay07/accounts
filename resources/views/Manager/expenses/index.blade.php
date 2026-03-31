@@ -2296,7 +2296,7 @@
 
             try {
                 const response = await fetch(
-                    `https://xhtmlreviews.in/finance-manager/manager/expenses/${expenseId}`, {
+                    `/manager/expenses/${expenseId}`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -2332,7 +2332,7 @@
 
             try {
                 const response = await fetch(
-                    `https://xhtmlreviews.in/finance-manager/manager/expenses/${expenseId}`, {
+                    `/manager/expenses/${expenseId}`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -2367,7 +2367,7 @@
 
             try {
                 const response = await fetch(
-                    `https://xhtmlreviews.in/finance-manager/manager/expenses/${expenseId}`, {
+                    `/manager/expenses/${expenseId}`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -2399,7 +2399,7 @@
     async function editExpense(expenseId, expenseType = 'non-standard') {
         try {
             const response = await fetch(
-                `https://xhtmlreviews.in/finance-manager/manager/expenses/${expenseId}/edit`);
+                `/manager/expenses/${expenseId}/edit`);
             const data = await response.json();
 
             if (!data.success) {
@@ -3027,7 +3027,7 @@
     // Mark as paid
     function markAsPaid(expenseId) {
         if (confirm('Mark this expense as paid?')) {
-            fetch(`https://xhtmlreviews.in/finance-manager/manager/expenses/${expenseId}/mark-paid`, {
+            fetch(`/manager/expenses/${expenseId}/mark-paid`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -3053,7 +3053,7 @@
     // Delete expense
     function deleteExpense(expenseId) {
         if (confirm('Are you sure you want to delete this expense?')) {
-            fetch(`https://xhtmlreviews.in/finance-manager/manager/expenses/${expenseId}`, {
+            fetch(`/manager/expenses/${expenseId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -3080,7 +3080,7 @@
     async function viewReceipts(expenseId) {
         try {
             const response = await fetch(
-                `https://xhtmlreviews.in/finance-manager/manager/expenses/${expenseId}/receipts`);
+                `/manager/expenses/${expenseId}/receipts`);
             const data = await response.json();
 
             const receiptsGallery = document.getElementById('receiptsGallery');
@@ -3460,7 +3460,7 @@
     async function viewSplitHistory(expenseId) {
         try {
             const response = await fetch(
-                `https://xhtmlreviews.in/finance-manager/manager/expenses/${expenseId}/split-history`);
+                `/manager/expenses/${expenseId}/split-history`);
             const data = await response.json();
 
             const splitHistoryContent = document.getElementById('splitHistoryContent');
