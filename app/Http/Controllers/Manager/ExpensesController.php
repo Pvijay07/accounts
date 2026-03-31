@@ -11,9 +11,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Receipt;
 use App\Models\Tax;
+use App\Traits\ManagesCompanies;
+use App\Exports\ExpenseExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ExpensesController extends Controller
 {
+  use ManagesCompanies;
   public function index(Request $request)
   {
     // Get the authenticated user
@@ -650,7 +655,7 @@ class ExpensesController extends Controller
         'expense_name'   => $request->expense_name,
         'company_id'     => $request->company_id,
         'category_id'    => $request->category_id,
-        'actual_amount'  => $isSplitPayment ? $paidBaseAmount : ($request->status === 'paid' ? $actualTotalBase : 0), 
+        'actual_amount'  => $isSplitPayment ? $paidBaseAmount : ($request->status === 'paid' ? $actualTotalBase : 0),
         'planned_amount' => $isSplitPayment ? $paidAmount : $plannedAmount,
         'status'         => $isSplitPayment ? 'paid' : $request->status,
         'source'         => 'manual',
@@ -668,7 +673,7 @@ class ExpensesController extends Controller
 
         // Schedule payment fields
         'paid_amount'     => $paidAmount,
-        'balance_amount'  => $isSplitPayment ? 0 : $balanceAmount, 
+        'balance_amount'  => $isSplitPayment ? 0 : $balanceAmount,
       ];
 
       // If status is paid (or split payment), set paid_date
@@ -1516,7 +1521,7 @@ class ExpensesController extends Controller
         ->get();
 
       $totalPaid = $allSplits->sum('actual_amount');
-      $originalSum = $rootExpense->schedule_amount ?: $allSplits->sum('planned_amount'); 
+      $originalSum = $rootExpense->schedule_amount ?: $allSplits->sum('planned_amount');
       // If planned_amount was fully paid, use original sum, otherwise sum of splits
 
       return response()->json([

@@ -15,10 +15,13 @@ use App\Models\Invoice;
 use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
-
+use App\Traits\ManagesCompanies;
+use App\Exports\IncomeExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class IncomeController extends Controller
 {
+    use ManagesCompanies;
   public function index(Request $request)
   {
     $user = auth()->user();
@@ -1146,11 +1149,34 @@ class IncomeController extends Controller
     ]);
   }
 
-  public function export(Request $request)
-  {
-    // Export logic here (use Maatwebsite/Excel package)
-    // Return Excel file download
-  }
+    public function export(Request $request)
+    {
+        $companyIds = $this->getUserCompanyIds($request->company);
+        $dateRange = $request->get('date_range', 'month');
+        $status = $request->get('status', 'all');
+        $type = $request->get('export_type', 'excel');
+
+        $query = Income::with(['company', 'category'])
+            ->whereIn('company_id', $companyIds);
+
+        // Apply filters (similar to index)
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $incomes = $query->get();
+
+        if ($type === 'excel') {
+            return Excel::download(new IncomeExport($incomes), 'income_report_' . date('Y-m-d') . '.xlsx');
+        } else {
+            $pdf = Pdf::loadView('Manager.exports.income_pdf', [
+                'incomes' => $incomes,
+                'period' => $dateRange,
+                'title' => 'Income & Balances Report'
+            ]);
+            return $pdf->download('income_report_' . date('Y-m-d') . '.pdf');
+        }
+    }
   // ========== UPCOMING PAYMENTS PAGE ==========
   public function upcoming(Request $request)
   {

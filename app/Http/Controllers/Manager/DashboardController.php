@@ -6,16 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\{Company, Expense, Income, UpcomingPayment};
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Traits\ManagesCompanies;
 
 class DashboardController extends Controller
 {
+    use ManagesCompanies;
+
     public function index(Request $request)
     {
         $user = auth()->user();
         
         // Get filters
         $dateRange = $request->get('range', 'month');
-        $companyId = $request->get('company');
+        $companyId = $request->get('company', 'all');
         $viewType = $request->get('view', 'summary');
         
         // Get date range
@@ -24,7 +27,7 @@ class DashboardController extends Controller
         $endDate = $dateFilters['end'] ?? Carbon::now()->endOfMonth();
         
         // Get company IDs for the user
-        $companyIds = $this->getCompanyIds($user, $companyId);
+        $companyIds = $this->getUserCompanyIds($companyId);
         
         // Calculate current period stats
         $currentStats = $this->calculateCurrentStats($companyIds, $startDate, $endDate, $dateRange);
@@ -47,7 +50,7 @@ class DashboardController extends Controller
         $notifications = $this->getNotificationsData($companyIds);
         
         // Get companies for dropdown
-        $companies = $this->getCompaniesForDropdown($user);
+        $companies = $this->getUserCompanies();
         
         return view('Manager.dashboard', compact(
             'currentStats',
@@ -67,14 +70,17 @@ class DashboardController extends Controller
     public function getDashboardData(Request $request)
     {
         $user = auth()->user();
-        $companyIds = $this->getCompanyIds($user, $request->company_id);
-        $dateRange = $this->getDateRange($request->date_range ?? 'this_month');
+        $companyIds = $this->getUserCompanyIds($request->company_id ?? 'all');
+        $dateRange = $this->getDateRange($request->date_range ?? 'month');
+        
+        $startDate = $dateRange['start'];
+        $endDate = $dateRange['end'];
 
         $totalIncome = Income::whereIn('company_id', $companyIds)
-            ->whereBetween('income_date', $dateRange)
+            ->whereBetween('income_date', [$startDate, $endDate])
             ->sum('amount');
 
-        $totalExpenses = $this->calculateTotalExpenses($companyIds, $dateRange);
+        $totalExpenses = $this->calculateTotalExpenses($companyIds, [$startDate, $endDate]);
 
         return response()->json([
             'metrics' => [
@@ -87,31 +93,11 @@ class DashboardController extends Controller
                     ->sum('amount'),
             ],
             'immediate_payments' => $this->getImmediatePaymentsForApi($companyIds),
-            'company_wise_pl' => $this->getCompanyWisePLForApi($companyIds, $dateRange),
+            'company_wise_pl' => $this->getCompanyWisePLForApi($companyIds, [$startDate, $endDate]),
         ]);
     }
 
     // Helper methods for view data
-    private function getCompanyIds($user, $specificCompanyId = null)
-    {
-        if ($specificCompanyId) {
-            // Verify the user has access to this specific company
-            $hasAccess = Company::where('id', $specificCompanyId)
-                ->where('manager_id', $user->id)
-                ->exists();
-            
-            return $hasAccess ? [$specificCompanyId] : [];
-        }
-
-        if ($user->isAdmin() || $user->isCA()) {
-            return Company::where('status', 'active')->pluck('id')->toArray();
-        }
-
-        return Company::where('manager_id', $user->id)
-            ->where('status', 'active')
-            ->pluck('id')
-            ->toArray();
-    }
 
     private function calculateCurrentStats($companyIds, $startDate, $endDate, $dateRange)
     {

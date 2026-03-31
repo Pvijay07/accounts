@@ -7,73 +7,19 @@ use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Expense;
 use App\Models\Tax;
+use App\Traits\ManagesCompanies;
+use App\Exports\TdsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Attachment;
 
 class TDSController extends Controller
 {
-    /**
-     * Get company IDs for the authenticated user
-     */
-    private function getUserCompanyIds($specificCompanyId = null)
-    {
-        $user = auth()->user();
+    use ManagesCompanies;
 
-        if ($specificCompanyId) {
-            // Verify the user has access to this specific company
-            $hasAccess = Company::where('id', $specificCompanyId)
-                ->where('manager_id', $user->id)
-                ->exists();
-
-            if ($hasAccess) {
-                return [$specificCompanyId];
-            } else {
-                // If user doesn't have access, return empty array
-                return [];
-            }
-        }
-
-        // For regular users, only return companies they manage
-        if ($user->isAdmin() || $user->isCA()) {
-            return Company::where('status', 'active')->pluck('id')->toArray();
-        }
-
-        return Company::where('manager_id', $user->id)
-            ->where('status', 'active')
-            ->pluck('id')
-            ->toArray();
-    }
-
-    /**
-     * Get companies for dropdown (only user's companies)
-     */
-    private function getUserCompanies()
-    {
-        $user = auth()->user();
-
-        if ($user->isAdmin() || $user->isCA()) {
-            return Company::where('status', 'active')->orderBy('name')->get();
-        }
-
-        return Company::where('manager_id', $user->id)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
-    }
-
-    private function generateMonths($count = 12)
-    {
-        $months = [];
-        for ($i = 0; $i < $count; $i++) {
-            $date     = date('Y-m', strtotime("-$i months"));
-            $months[] = [
-                'value' => $date,
-                'label' => date('M Y', strtotime($date)),
-            ];
-        }
-        return $months;
-    }
 
     public function index(Request $request)
     {
@@ -138,26 +84,6 @@ class TDSController extends Controller
         ]);
 
         return view('Manager.tds_income', $data);
-    }
-
-    public function getCommonViewData($month = null, $year = null)
-    {
-        // Generate last 12 months for dropdown
-        $months = [];
-        for ($i = 0; $i < 12; $i++) {
-            $date = date('Y-m', strtotime("-$i months"));
-            $months[] = [
-                'value' => $date,
-                'label' => date('F Y', strtotime($date))
-            ];
-        }
-
-        return [
-            'months' => $months,
-            'currentMonth' => $month ? date('F Y', strtotime("$year-$month-01")) : date('F Y'),
-            'title' => 'TDS Management',
-            'activeMenu' => 'tds',
-        ];
     }
 
     public function tdsExpense(Request $request)
@@ -652,25 +578,78 @@ class TDSController extends Controller
             ], 500);
         }
     }
-    public function markTDSPaid($id)
+    public function exportData(Request $request, $type)
     {
-        try {
-            $tax = Tax::findOrFail($id);
-            // Mark as paid
-            $tax->update([
-                'payment_status' => 'received',
-                'paid_date'      => now(),
-            ]);
+        $companyIds = $this->getUserCompanyIds($request->company_id);
+        $period = $request->input('period', date('Y-m'));
+        $status = $request->input('status', 'all');
 
-            return response()->json([
-                'success' => true,
-                'message' => 'TDS marked as paid successfully'
+        $selectedMonth = date('m', strtotime($period));
+        $selectedYear = date('Y', strtotime($period));
+
+        $query = Tax::where('tax_type', 'tds')
+            ->where(function ($query) {
+                $query->where('taxable_type', 'App\Models\Income')
+                    ->orWhere('taxable_type', 'App\Models\Invoice');
+            })
+            ->whereMonth('created_at', $selectedMonth)
+            ->whereYear('created_at', $selectedYear)
+            ->whereHas('taxable.company', function ($query) use ($companyIds) {
+                $query->whereIn('id', $companyIds);
+            })
+            ->with(['taxable', 'taxable.company']);
+
+        if ($status !== 'all') {
+            $query->where('payment_status', $status);
+        }
+
+        $taxes = $query->get();
+
+        if ($type === 'excel') {
+            return Excel::download(new TdsExport($taxes), 'tds_income_report_' . $period . '.xlsx');
+        } else {
+             $pdf = Pdf::loadView('Manager.exports.tds_pdf', [
+                'taxes' => $taxes,
+                'period' => $period,
+                'type' => 'Income'
             ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error marking TDS as paid: ' . $e->getMessage()
-            ], 500);
+            return $pdf->download('tds_income_report_' . $period . '.pdf');
+        }
+    }
+
+    public function exportExpenseData(Request $request, $type)
+    {
+        $companyIds = $this->getUserCompanyIds($request->company_id);
+        $period = $request->input('period', date('Y-m'));
+        $status = $request->input('status', 'all');
+
+        $selectedMonth = date('m', strtotime($period));
+        $selectedYear = date('Y', strtotime($period));
+
+        $query = Tax::where('tax_type', 'tds')
+            ->where('direction', 'expense')
+            ->whereMonth('created_at', $selectedMonth)
+            ->whereYear('created_at', $selectedYear)
+            ->whereHas('taxable.company', function ($query) use ($companyIds) {
+                $query->whereIn('id', $companyIds);
+            })
+            ->with(['taxable', 'taxable.company']);
+
+        if ($status !== 'all') {
+            $query->where('payment_status', $status);
+        }
+
+        $taxes = $query->get();
+
+        if ($type === 'excel') {
+            return Excel::download(new TdsExport($taxes), 'tds_expense_report_' . $period . '.xlsx');
+        } else {
+            $pdf = Pdf::loadView('Manager.exports.tds_pdf', [
+                'taxes' => $taxes,
+                'period' => $period,
+                'type' => 'Expense'
+            ]);
+            return $pdf->download('tds_expense_report_' . $period . '.pdf');
         }
     }
 }

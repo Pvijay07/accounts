@@ -10,92 +10,17 @@ use App\Models\GstTask;
 use App\Models\Income;
 use App\Models\Invoice;
 use App\Models\Tax;
+use App\Traits\ManagesCompanies;
+use App\Exports\GstExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 class GSTController extends Controller
 {
-    private function generateMonths($count = 12)
-    {
-        $months = [];
-        for ($i = 0; $i < $count; $i++) {
-            $date     = date('Y-m', strtotime("-$i months"));
-            $months[] = [
-                'value' => $date,
-                'label' => date('M Y', strtotime($date)),
-            ];
-        }
-        return $months;
-    }
-
-    /**
-     * Get company IDs for the authenticated user
-     */
-    private function getUserCompanyIds($specificCompanyId = null)
-    {
-        $user = auth()->user();
-        
-        if ($specificCompanyId) {
-            // Verify the user has access to this specific company
-            $hasAccess = Company::where('id', $specificCompanyId)
-                ->where('manager_id', $user->id)
-                ->exists();
-            
-            if ($hasAccess) {
-                return [$specificCompanyId];
-            } else {
-                // If user doesn't have access, return empty array
-                return [];
-            }
-        }
-
-        // For regular users, only return companies they manage
-        if ($user->isAdmin() || $user->isCA()) {
-            return Company::where('status', 'active')->pluck('id')->toArray();
-        }
-
-        return Company::where('manager_id', $user->id)
-            ->where('status', 'active')
-            ->pluck('id')
-            ->toArray();
-    }
-
-    /**
-     * Get companies for dropdown (only user's companies)
-     */
-    private function getUserCompanies()
-    {
-        $user = auth()->user();
-        
-        if ($user->isAdmin() || $user->isCA()) {
-            return Company::where('status', 'active')->get(['id', 'name']);
-        }
-
-        return Company::where('manager_id', $user->id)
-            ->where('status', 'active')
-            ->get(['id', 'name']);
-    }
-
-    /**
-     * Get common view data with user's companies
-     */
-    private function getCommonViewData($selectedMonth = null, $selectedYear = null)
-    {
-        if (! $selectedMonth) {
-            $selectedMonth = date('m');
-        }
-
-        if (! $selectedYear) {
-            $selectedYear = date('Y');
-        }
-
-        return [
-            'currentPeriod' => date('M Y', strtotime("$selectedYear-$selectedMonth-01")),
-            'companies'     => $this->getUserCompanies(), // Only user's companies
-            'months'        => $this->generateMonths(),
-        ];
-    }
+    use ManagesCompanies;
 
     /**
      * Main GST dashboard
@@ -772,17 +697,99 @@ class GSTController extends Controller
         return view('Manager.gst_settlement_show', compact('settlement'));
     }
 
-    public function exportSettlements(Request $request)
+    public function exportGstCollected(Request $request, $type)
     {
-        $type = $request->input('type', 'excel');
         $companyIds = $this->getUserCompanyIds($request->company_id);
+        $period = $request->input('period', date('Y-m'));
         
-        $settlements = GstSettlement::whereIn('company_id', $companyIds)
-            ->with('company')
+        $selectedMonth = date('m', strtotime($period));
+        $selectedYear = date('Y', strtotime($period));
+
+        $taxes = Tax::where('tax_type', 'gst')
+            ->where('direction', 'income')
+            ->whereMonth('created_at', $selectedMonth)
+            ->whereYear('created_at', $selectedYear)
+            ->whereHas('taxable.company', function($q) use ($companyIds) {
+                $q->whereIn('id', $companyIds);
+            })
+            ->with(['taxable', 'taxable.company'])
             ->get();
 
-        // Implement export logic (Excel or PDF)
-        // You can use Laravel Excel package or DomPDF
+        if ($type === 'excel') {
+            return Excel::download(new GstExport($taxes), 'gst_collected_' . $period . '.xlsx');
+        } else {
+             $pdf = Pdf::loadView('Manager.exports.gst_pdf', [
+                'taxes' => $taxes,
+                'period' => $period,
+                'title' => 'GST Collected (Output)'
+            ]);
+            return $pdf->download('gst_collected_' . $period . '.pdf');
+        }
+    }
+
+    public function exportTaxes(Request $request, $type)
+    {
+        $companyIds = $this->getUserCompanyIds($request->company_id);
+        $period = $request->input('period', date('Y-m'));
+        $taxTypeFilter = $request->input('tax_type', 'all');
+
+        $selectedMonth = date('m', strtotime($period));
+        $selectedYear = date('Y', strtotime($period));
+
+        $query = Tax::where('direction', 'expense')
+            ->whereMonth('created_at', $selectedMonth)
+            ->whereYear('created_at', $selectedYear)
+            ->whereHas('taxable.company', function($q) use ($companyIds) {
+                $q->whereIn('id', $companyIds);
+            })
+            ->with(['taxable', 'taxable.company']);
+
+        if ($taxTypeFilter !== 'all') {
+            $query->where('tax_type', $taxTypeFilter);
+        }
+
+        $taxes = $query->get();
+
+        if ($type === 'excel') {
+            return Excel::download(new GstExport($taxes), 'gst_input_taxes_' . $period . '.xlsx');
+        } else {
+            $pdf = Pdf::loadView('Manager.exports.gst_pdf', [
+                'taxes' => $taxes,
+                'period' => $period,
+                'title' => 'GST Paid (Input Tax Credit)'
+            ]);
+            return $pdf->download('gst_input_taxes_' . $period . '.pdf');
+        }
+    }
+
+    public function export(Request $request, $type)
+    {
+        // Combined report for the dashboard
+        $companyIds = $this->getUserCompanyIds($request->company_id);
+        $period = $request->input('period', date('Y-m'));
+
+        $selectedMonth = date('m', strtotime($period));
+        $selectedYear = date('Y', strtotime($period));
+
+        $taxes = Tax::whereIn('tax_type', ['gst', 'tds'])
+             ->whereMonth('created_at', $selectedMonth)
+             ->whereYear('created_at', $selectedYear)
+             ->whereHas('taxable.company', function($q) use ($companyIds) {
+                 $q->whereIn('id', $companyIds);
+             })
+             ->with(['taxable', 'taxable.company'])
+             ->get();
+
+        if ($type === 'excel') {
+             return Excel::download(new GstExport($taxes), 'tax_summary_' . $period . '.xlsx');
+        } else {
+             $pdf = Pdf::loadView('Manager.exports.gst_pdf', [
+                'taxes' => $taxes,
+                'period' => $period,
+                'title' => 'Tax Dashboard Summary'
+            ]);
+            return $pdf->download('tax_summary_' . $period . '.pdf');
+        }
     }
 
     public function returns(Request $request)
@@ -972,90 +979,26 @@ class GSTController extends Controller
         }
     }
 
-    public function exportTaxes(Request $request, $type)
+    public function exportTasks(Request $request)
     {
-        // Get user's company IDs
         $companyIds = $this->getUserCompanyIds($request->company_id);
-        
-        $companyId = $request->input('company_id', 'all');
-        $period    = $request->input('period', date('Y-m'));
-        $taxType   = $request->input('tax_type', 'all');
-
-        // Parse period
-        $selectedMonth = date('m', strtotime($period));
-        $selectedYear  = date('Y', strtotime($period));
-
-        // Get the data (same logic as index method) - Only from user's companies
-        $expenseTaxesQuery = Tax::where(function ($query) {
-                $query->where('direction', 'expense')
-                    ->orWhere('taxable_type', 'App\Models\Expense');
-            })
-            ->whereMonth('created_at', $selectedMonth)
-            ->whereYear('created_at', $selectedYear)
-            ->whereHas('taxable.company', function ($query) use ($companyIds) {
-                $query->whereIn('id', $companyIds);
-            });
-
-        if ($taxType !== 'all') {
-            $expenseTaxesQuery->where('tax_type', $taxType);
-        }
-
-        $expenseTaxes = $expenseTaxesQuery->with(['taxable.company', 'taxable.categoryRelation'])->get();
-
-        // Filter by specific company if needed
-        if ($companyId !== 'all') {
-            $expenseTaxes = $expenseTaxes->filter(function ($tax) use ($companyId) {
-                return $tax->taxable && $tax->taxable->company_id == $companyId;
-            });
-        }
-
-        // Prepare data for export
-        $data = $expenseTaxes->map(function ($tax) {
-            $expense = $tax->taxable;
-            return [
-                'Date'           => $expense->paid_date ? date('d-m-Y', strtotime($expense->paid_date)) : date('d-m-Y', strtotime($expense->created_at)),
-                'Company'        => $expense->company->name ?? 'N/A',
-                'Expense Name'   => $expense->expense_name ?? 'N/A',
-                'Vendor/Party'   => $expense->party_name ?? 'N/A',
-                'Tax Type'       => strtoupper($tax->tax_type),
-                'Expense Amount' => number_format($expense->actual_amount ?? 0, 2),
-                'Tax Percentage' => $tax->tax_percentage . '%',
-                'Tax Amount'     => number_format($tax->tax_amount, 2),
-                'Payment Status' => ucfirst($tax->payment_status),
-                'Notes'          => $tax->payment_notes ?? ($expense->notes ?? 'N/A'),
-            ];
-        });
-
-        // Add totals row
-        $data->push([
-            'Date'           => 'TOTAL',
-            'Company'        => '',
-            'Expense Name'   => '',
-            'Vendor/Party'   => '',
-            'Tax Type'       => '',
-            'Expense Amount' => number_format($expenseTaxes->sum(function ($tax) {
-                return $tax->taxable->actual_amount ?? 0;
-            }), 2),
-            'Tax Percentage' => '',
-            'Tax Amount'     => number_format($expenseTaxes->sum('tax_amount'), 2),
-            'Payment Status' => '',
-            'Notes'          => '',
-        ]);
-
-        if ($type === 'excel') {
-            return Excel::download(new TaxesExport($data), "expense_taxes_{$period}.xlsx");
-        } elseif ($type === 'pdf') {
-            $pdf = PDF::loadView('Manager.exports.taxes_pdf', [
-                'data'         => $data,
-                'period'       => date('M Y', strtotime($period)),
-                'totalTax'     => $expenseTaxes->sum('tax_amount'),
-                'totalExpense' => $expenseTaxes->sum(function ($tax) {
-                    return $tax->taxable->actual_amount ?? 0;
-                }),
-            ]);
-            return $pdf->download("expense_taxes_{$period}.pdf");
-        }
-
-        return back()->with('error', 'Invalid export type');
+        $tasks = GstTask::whereIn('company_id', $companyIds)
+            ->with('company')
+            ->get();
+            
+        $pdf = Pdf::loadView('Manager.exports.gst_tasks_pdf', compact('tasks'));
+        return $pdf->download('gst_tasks_' . date('Y-m-d') . '.pdf');
     }
+
+    public function exportSettlements(Request $request)
+    {
+        $companyIds = $this->getUserCompanyIds($request->company_id);
+        $settlements = GstSettlement::whereIn('company_id', $companyIds)
+            ->with('company')
+            ->get();
+            
+        $pdf = Pdf::loadView('Manager.exports.gst_settlements_pdf', compact('settlements'));
+        return $pdf->download('gst_settlements_' . date('Y-m-d') . '.pdf');
+    }
+
 }

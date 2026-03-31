@@ -598,19 +598,6 @@
                     <i class="fas fa-calendar-day"></i>
                     <span>Advances/Loans</span>
                 </a>
-                <a href="{{ route('manager.reports') }}"
-                    class="menu-item {{ request()->routeIs('manager.reports') ? 'active' : '' }}" data-page="reports">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Reports & Export</span>
-                </a>
-                <a href="#import" class="menu-item" data-page="import">
-                    <i class="fas fa-file-import"></i>
-                    <span>Import Data</span>
-                </a>
-                <a href="#notifications" class="menu-item" data-page="notifications">
-                    <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
-                </a>
             </div>
         </div>
         <!-- MAIN CONTENT -->
