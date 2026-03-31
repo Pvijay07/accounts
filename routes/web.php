@@ -108,13 +108,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/system-settings/optimize-db', [SystemSettingsController::class, 'optimizeDatabase'])->name('settings.optimize-db');
         Route::post('/system-settings/clear-logs', [SystemSettingsController::class, 'clearLogs'])->name('settings.clear-logs');
 
-        // Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::post('/categories/save', [CategoryController::class, 'store'])->name('categories.store');
-        Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
-        Route::post('/categories/settings', [CategoryController::class, 'saveSettings'])->name('settings.save');
-        Route::post('/categories/reset', [CategoryController::class, 'resetToDefaults'])->name('categories.reset');
-        // routes/web.php (admin section)
         Route::post('/categories/assign', [CategoryController::class, 'assign'])
             ->name('categories.assign');
         Route::post('/categories/bulk-update', [CategoryController::class, 'bulkUpdate'])->name('categories.bulk-update');
@@ -252,7 +246,7 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
     Route::post('/sync-expenses', [TDSController::class, 'syncExpenses'])->name('manager.tds.sync.expenses');
     Route::post('/mark-paid/{id}', [TDSController::class, 'markTDSPaid'])->name('manager.tds.mark-paid');
     Route::get('/getIncome/{id}', [IncomeController::class, 'show']);
-    // routes/web.php or routes/manager.php
+
     // Loans/Advances Routes
     Route::prefix('loans')->group(function () {
         Route::get('/', [LoansController::class, 'index'])->name('manager.loans.index');
@@ -292,6 +286,4 @@ Route::middleware(['auth', 'role:ca'])->prefix('ca')->group(function () {
     Route::get('/dashboard', [CADashboardController::class, 'index'])->name('ca.dashboard');
     Route::get('/statements', [StatementController::class, 'index'])->name('ca.statements');
     Route::get('/invoices', [CAInvoiceController::class, 'index'])->name('ca.invoices');
-
-    // Route::get('/statements/export', [CA\StatementController::class, 'export'])->name('ca.statements.export');
 });

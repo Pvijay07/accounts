@@ -96,10 +96,9 @@ class InvoiceManagementController extends Controller
       'issue_date'                 => 'required|date',
       'due_date'                   => 'required|date|after_or_equal:issue_date',
       'currency'                   => 'required|in:INR,USD,EUR,GBP',
-      // 'conversion_rate'            => 'required|numeric|min:0.0001',
-      'conversion_rate_percentage' => 'nullable|numeric|min:0|max:100', // Add this
-      'conversion_cost'            => 'nullable|numeric|min:0', // Add this
-      'receivable_amount'          => 'nullable|numeric|min:0', // Add this
+      'conversion_rate_percentage' => 'nullable|numeric|min:0|max:100',
+      'conversion_cost'            => 'nullable|numeric|min:0',
+      'receivable_amount'          => 'nullable|numeric|min:0',
       'total_amount'               => 'required|numeric|min:0',
       'converted_amount'           => 'required|numeric|min:0',
       'client_gstin'               => 'nullable|string|max:20',
@@ -187,9 +186,8 @@ class InvoiceManagementController extends Controller
         'original_currency_amount' => $request->total_amount,
         'currency'                 => $request->currency,
         'received_amount'          => $receivableAmount,
-        // 'conversion_rate'            => $request->conversion_rate,
-        'conversion_rate'          => $request->conversion_rate_percentage ?? 0, // Add this
-        'conversion_cost'          => $conversionCost, // Add this
+        'conversion_rate'          => $request->conversion_rate_percentage ?? 0,
+        'conversion_cost'          => $conversionCost,
         'issue_date'               => $request->issue_date,
         'due_date'                 => $request->due_date,
         'purpose_comment'          => $request->purpose_comment,
@@ -219,7 +217,7 @@ class InvoiceManagementController extends Controller
         'is_partial'                 => 0,
         'created_by'                 => auth()->id(),
         'conversion_cost'            => $conversionCost, // Add conversion cost to income
-        'conversion_rate_percentage' => $request->conversion_rate_percentage ?? 0, // Add this
+        'conversion_rate_percentage' => $request->conversion_rate_percentage ?? 0,
         'income_type'    => 'standard',
         'source'         => 'manual',
         'client_details'           => json_encode($clientDetails),
@@ -293,7 +291,7 @@ class InvoiceManagementController extends Controller
         'description'                => $request->purpose_comment,
         'client_details'             => json_encode($clientDetails),
         'conversion_cost'            => $conversionCost, // Add conversion cost
-        'conversion_rate_percentage' => $request->conversion_rate_percentage ?? 0, // Add this
+        'conversion_rate_percentage' => $request->conversion_rate_percentage ?? 0,
       ]);
 
       DB::commit();
@@ -831,15 +829,6 @@ class InvoiceManagementController extends Controller
       'amountInWords',
       'logoBase64'
     ));
-    // return view('Admin.pdf.invoice-template', compact(
-    //   'invoice',
-    //   'clientDetails',
-    //   'company',
-    //   'lineItems',
-    //   'amountInWords',
-    //   'logoBase64'
-
-    // ));
     $pdf->setOptions([
       'defaultFont'          => 'DejaVu Sans',
       'isHtml5ParserEnabled' => true,

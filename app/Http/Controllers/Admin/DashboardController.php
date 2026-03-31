@@ -222,135 +222,119 @@ class DashboardController extends Controller
 
     private function getFinancialData($range, $companyId)
     {
-        // Generate labels based on range
         $labels = [];
-        $income = [];
-        $expenses = [];
+        $incomeData = [];
+        $expenseData = [];
 
-        switch ($range) {
-            case 'today':
-                $labels = ['00-04', '04-08', '08-12', '12-16', '16-20', '20-24'];
-                for ($i = 0; $i < 6; $i++) {
-                    $income[] = rand(5000, 50000);
-                    $expenses[] = rand(3000, 30000);
-                }
-                break;
+        $companyQuery = function($q) use ($companyId) {
+            if ($companyId) {
+                $q->where('company_id', $companyId);
+            }
+        };
 
-            case 'week':
-                $labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                for ($i = 0; $i < 7; $i++) {
-                    $income[] = rand(10000, 100000);
-                    $expenses[] = rand(5000, 70000);
-                }
-                break;
-
-            case 'month':
-                $labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-                for ($i = 0; $i < 4; $i++) {
-                    $income[] = rand(50000, 300000);
-                    $expenses[] = rand(30000, 200000);
-                }
-                break;
-
-            default:
-                $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                for ($i = 0; $i < 12; $i++) {
-                    $income[] = rand(100000, 500000);
-                    $expenses[] = rand(80000, 400000);
-                }
+        if ($range === 'today') {
+            $labels = ['00-04', '04-08', '08-12', '12-16', '16-20', '20-24'];
+            $ranges = [
+                ['00:00:00', '03:59:59'],
+                ['04:00:00', '07:59:59'],
+                ['08:00:00', '11:59:59'],
+                ['12:00:00', '15:59:59'],
+                ['16:00:00', '19:59:59'],
+                ['20:00:00', '23:59:59'],
+            ];
+            foreach ($ranges as $r) {
+                $start = now()->format('Y-m-d') . ' ' . $r[0];
+                $end = now()->format('Y-m-d') . ' ' . $r[1];
+                $incomeData[] = \App\Models\Income::whereBetween('created_at', [$start, $end])->where($companyQuery)->sum('amount');
+                $expenseData[] = \App\Models\Expense::whereBetween('created_at', [$start, $end])->where($companyQuery)->sum('actual_amount');
+            }
+        } elseif ($range === 'week') {
+            $labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            for ($i = 0; $i < 7; $i++) {
+                $date = now()->startOfWeek()->addDays($i)->format('Y-m-d');
+                $incomeData[] = \App\Models\Income::whereDate('created_at', $date)->where($companyQuery)->sum('amount');
+                $expenseData[] = \App\Models\Expense::whereDate('created_at', $date)->where($companyQuery)->sum('actual_amount');
+            }
+        } elseif ($range === 'month') {
+            $labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            for ($i = 0; $i < 4; $i++) {
+                $start = now()->startOfMonth()->addWeeks($i)->format('Y-m-d H:i:s');
+                $end = now()->startOfMonth()->addWeeks($i)->endOfWeek()->format('Y-m-d H:i:s');
+                $incomeData[] = \App\Models\Income::whereBetween('created_at', [$start, $end])->where($companyQuery)->sum('amount');
+                $expenseData[] = \App\Models\Expense::whereBetween('created_at', [$start, $end])->where($companyQuery)->sum('actual_amount');
+            }
+        } else {
+            $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            for ($i = 1; $i <= 12; $i++) {
+                $incomeData[] = \App\Models\Income::whereMonth('created_at', $i)->whereYear('created_at', now()->year)->where($companyQuery)->sum('amount');
+                $expenseData[] = \App\Models\Expense::whereMonth('created_at', $i)->whereYear('created_at', now()->year)->where($companyQuery)->sum('actual_amount');
+            }
         }
 
         return [
             'labels' => $labels,
-            'income' => $income,
-            'expenses' => $expenses
+            'income' => $incomeData,
+            'expenses' => $expenseData
         ];
     }
 
     private function getRecentActivities()
     {
-        // In real app, fetch from ActivityLog model
-        return collect([
-            [
-                'time' => '10:25 AM',
-                'date' => 'Today',
-                'user' => 'John Manager',
-                'role' => 'Manager',
-                'action' => 'Marked as Paid',
-                'action_color' => 'success',
-                'resource' => 'Expense: Office Rent',
-                'details' => 'Company A - ₹25,000',
-                'ip' => '192.168.1.105'
-            ],
-            [
-                'time' => '09:45 AM',
-                'date' => 'Today',
-                'user' => 'Super Admin',
-                'role' => 'Admin',
-                'action' => 'Created User',
-                'action_color' => 'info',
-                'resource' => 'User: Priya Sharma',
-                'details' => 'Role: Manager',
-                'ip' => '192.168.1.100'
-            ],
-            [
-                'time' => '09:30 AM',
-                'date' => 'Today',
-                'user' => 'Raj Manager',
-                'role' => 'Manager',
-                'action' => 'Added Expense',
-                'action_color' => 'warning',
-                'resource' => 'Non-standard: Server Maintenance',
-                'details' => 'Company B - ₹8,500',
-                'ip' => '192.168.1.102'
-            ],
-            [
-                'time' => '05:15 PM',
-                'date' => 'Yesterday',
-                'user' => 'Super Admin',
-                'role' => 'Admin',
-                'action' => 'Updated Settings',
-                'action_color' => 'primary',
-                'resource' => 'System: Reminder Days',
-                'details' => 'Changed from 5 to 7 days',
-                'ip' => '192.168.1.100'
-            ]
-        ]);
+        return \App\Models\ActivityLog::with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function ($log) {
+                $actionColor = 'info';
+                if (stripos($log->action, 'delete') !== false) {
+                    $actionColor = 'danger';
+                } elseif (stripos($log->action, 'create') !== false || stripos($log->action, 'add') !== false || stripos($log->action, 'store') !== false) {
+                    $actionColor = 'success';
+                } elseif (stripos($log->action, 'update') !== false) {
+                    $actionColor = 'primary';
+                }
+
+                $time = $log->created_at->format('h:i A');
+                if ($log->created_at->isToday()) $date = 'Today';
+                elseif ($log->created_at->isYesterday()) $date = 'Yesterday';
+                else $date = $log->created_at->format('M d');
+
+                return [
+                    'time' => $time,
+                    'date' => $date,
+                    'user' => $log->user ? $log->user->name : 'System',
+                    'role' => $log->user ? ucfirst($log->user->role) : 'System',
+                    'action' => ucfirst($log->action),
+                    'action_color' => $actionColor,
+                    'resource' => $log->model_type . ' #' . $log->model_id,
+                    'details' => is_array($log->details) ? 'Updated record' : $log->details,
+                    'ip' => $log->ip_address ?? 'unknown'
+                ];
+            });
     }
 
     private function getTopUsers()
     {
-        // In real app, fetch from ActivityLog model
-        return collect([
-            [
-                'name' => 'Super Admin',
-                'role' => 'Admin',
-                'count' => 42,
-                'percentage' => 100,
-                'last_active' => '10:25 AM'
-            ],
-            [
-                'name' => 'John Manager',
-                'role' => 'Manager',
-                'count' => 28,
-                'percentage' => 67,
-                'last_active' => '09:45 AM'
-            ],
-            [
-                'name' => 'Raj Manager',
-                'role' => 'Manager',
-                'count' => 19,
-                'percentage' => 45,
-                'last_active' => '09:30 AM'
-            ],
-            [
-                'name' => 'Priya Manager',
-                'role' => 'Manager',
-                'count' => 15,
-                'percentage' => 36,
-                'last_active' => 'Yesterday'
-            ]
-        ]);
+        $totalLogs = \App\Models\ActivityLog::count();
+        $topUserIds = \App\Models\ActivityLog::select('user_id', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+            ->whereNotNull('user_id')
+            ->groupBy('user_id')
+            ->orderByDesc('count')
+            ->take(4)
+            ->get();
+            
+        return $topUserIds->map(function($record) use ($totalLogs) {
+            $user = User::find($record->user_id);
+            if (!$user) return null;
+            $percentage = $totalLogs > 0 ? round(($record->count / $totalLogs) * 100) : 0;
+            return [
+                'name' => $user->name,
+                'role' => ucfirst($user->role),
+                'count' => $record->count,
+                'percentage' => $percentage,
+                'last_active' => $user->last_login_at ? \Carbon\Carbon::parse($user->last_login_at)->diffForHumans() : 'Never'
+            ];
+        })->filter()->values();
     }
 
     private function getCompanyPerformance()

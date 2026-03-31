@@ -1,5 +1,257 @@
 @extends('Admin.layouts.app')
 @section('content')
+
+<style>
+    /* Premium UI/UX Enhancements for System Settings */
+    #system-settings {
+        animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Modern Pill Tabs Navigation */
+    #settingsTabs.nav-tabs {
+        border-bottom: none;
+        gap: 12px;
+        background: #ffffff;
+        padding: 12px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        margin-bottom: 2rem !important;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    #settingsTabs.nav-tabs::-webkit-scrollbar {
+        height: 4px;
+    }
+    #settingsTabs.nav-tabs::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.1);
+        border-radius: 4px;
+    }
+
+    #settingsTabs .nav-item {
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    #settingsTabs .nav-link {
+        border: none;
+        border-radius: 12px;
+        color: #64748b;
+        font-weight: 600;
+        padding: 12px 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        background: transparent;
+    }
+
+    #settingsTabs .nav-link:hover:not(.active) {
+        background: #f1f5f9;
+        color: #334155;
+        transform: translateY(-1px);
+    }
+
+    #settingsTabs .nav-link.active {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: #ffffff;
+        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+        transform: translateY(-2px);
+    }
+
+    /* Beautiful Cards */
+    .tab-content > .tab-pane > .card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+        background: #ffffff;
+        overflow: hidden;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .tab-content > .tab-pane > .card > .card-header {
+        background: transparent;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 24px 32px;
+    }
+
+    .tab-content .card-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .tab-content > .tab-pane > .card > form > .card-body,
+    .tab-content > .tab-pane > .card > .card-body {
+        padding: 32px;
+    }
+
+    /* Enhanced Forms Inputs */
+    .form-label {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        letter-spacing: 0.3px;
+    }
+
+    .form-control, .form-select, select.form-control {
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        padding: 12px 16px;
+        transition: all 0.25s ease;
+        background-color: #f8fafc;
+        color: #1e293b;
+        font-weight: 500;
+        box-shadow: none !important;
+    }
+
+    .form-control:focus, .form-select:focus, select.form-control:focus {
+        background-color: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
+        outline: none;
+    }
+
+    /* Checkboxes & Switches */
+    .form-check {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .form-check-input {
+        width: 1.25em;
+        height: 1.25em;
+        margin-top: 0.1em;
+        border: 2px solid #cbd5e1;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+        padding-left: 8px;
+        color: #334155;
+        font-weight: 500;
+    }
+
+    /* Input Groups */
+    .input-group-text {
+        border-radius: 12px;
+        background-color: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0 20px;
+    }
+    
+    .input-group .form-control {
+        border-left: none;
+    }
+    
+    .input-group .form-control:focus + .input-group-text {
+        border-color: #3b82f6;
+    }
+
+    /* Buttons */
+    .card-footer {
+        background-color: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+        padding: 20px 32px;
+        border-radius: 0 0 20px 20px !important;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+        background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #3b82f6;
+        color: #3b82f6;
+        background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        transform: translateY(-2px);
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        border: none;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Sub-cards inside Categories/Maintenance */
+    #expense .card, #backup .card.mt-4 .card {
+        border-radius: 16px;
+        border: 1px solid rgba(0,0,0,0.05) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #expense .card:hover, #backup .card.mt-4 .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+    }
+    
+    #expense .card-header {
+        border-radius: 16px 16px 0 0 !important;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .category-row .form-control {
+        background-color: #ffffff;
+    }
+    
+    .category-row .btn-danger {
+        border-radius: 10px;
+        padding: 10px;
+    }
+</style>
+
 <!-- System Settings Page -->
 <div id="system-settings" class="page">
     <!-- Tabs for different setting categories -->
@@ -936,32 +1188,15 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        let taxRateCount = {
-            {
-                count($taxRates)
-            }
-        };
-        let fixedExpenseCount = {
-            {
-                count($fixedExpenses ?? [])
-            }
-        };
-        let editableExpenseCount = {
-            {
-                count($editableExpenses ?? [])
-            }
-        };
-        let variableCategoryCount = {
-            {
-                count($variableCategories ?? [])
-            }
-        };
+        let taxRateCount = {{ count($taxRates ?? []) }};
+        let fixedExpenseCount = {{ count($fixedExpenses ?? []) }};
+        let editableExpenseCount = {{ count($editableExpenses ?? []) }};
+        let variableCategoryCount = {{ count($variableCategories ?? []) }};
 
         // Test Email Function
         window.testEmail = function() {
             if (confirm('Send test email to admin email?')) {
-                fetch('{{ route('
-                        admin.settings.test - email ') }}', {
+                fetch('{{ route('admin.settings.test-email') }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -1026,8 +1261,7 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Backing up...';
                 btn.disabled = true;
 
-                fetch('{{ route('
-                        admin.settings.backup.run ') }}', {
+                fetch('{{ route('admin.settings.backup.run') }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -1056,8 +1290,7 @@
         // Maintenance Functions
         window.clearCache = function() {
             if (confirm('Clear application cache?')) {
-                fetch('{{ route('
-                        admin.settings.clear - cache ') }}', {
+                fetch('{{ route('admin.settings.clear-cache') }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -1076,8 +1309,7 @@
 
         window.optimizeDatabase = function() {
             if (confirm('Optimize database tables?')) {
-                fetch('{{ route('
-                        admin.settings.optimize - db ') }}', {
+                fetch('{{ route('admin.settings.optimize-db') }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -1098,8 +1330,7 @@
             if (confirm('Clear old activity logs? This cannot be undone.')) {
                 const days = prompt('Delete logs older than (days):', '30');
                 if (days) {
-                    fetch('{{ route('
-                            admin.settings.clear - logs ') }}', {
+                    fetch('{{ route('admin.settings.clear-logs') }}', {
                                 method: 'POST',
                                 headers: {
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -1337,8 +1568,7 @@
         saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
         saveBtn.disabled = true;
 
-        fetch('{{ route('
-                admin.categories.bulk - update ') }}', {
+        fetch('{{ route('admin.categories.bulk-update') }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,

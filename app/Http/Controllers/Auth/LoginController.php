@@ -35,7 +35,7 @@ class LoginController extends Controller
         }
 
         // Check if user is active (if you have status field)
-        if (property_exists($user, 'status') && $user->status !== 'active') {
+        if (array_key_exists('status', $user->getAttributes()) && $user->status !== 'active') {
             $this->logLoginAttempt($request, 'account_inactive');
             throw ValidationException::withMessages([
                 'email' => __('Your account has been deactivated. Please contact administrator.'),
@@ -50,7 +50,6 @@ class LoginController extends Controller
 
             // Log successful login
             $this->logLoginAttempt($request, 'success', $user);
-            // dd($user);
             // Redirect based on role
             return $this->authenticated($request, $user);
         }

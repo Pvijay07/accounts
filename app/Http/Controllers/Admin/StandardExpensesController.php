@@ -191,9 +191,6 @@ class StandardExpensesController extends Controller
   /**
    * Save or update tax record
    */
-  /**
-   * Save or update tax record
-   */
   private function saveTax($expense, $taxType, $taxData)
   {
     // Make sure tax_amount is not null
@@ -238,9 +235,6 @@ class StandardExpensesController extends Controller
       $expense->taxes()->create($taxData);
     }
   }
-  /**
-   * Calculate tax due date based on expense frequency
-   */
   /**
    * Calculate tax due date based on expense frequency
    */
@@ -427,8 +421,7 @@ class StandardExpensesController extends Controller
       'tds_percentage' => 'nullable|numeric|min:0|max:100',
       'tds_subtotal'   => 'nullable|numeric|min:0',
     ]);
-    // echo $request->is_active;
-    // die;
+
     try {
       DB::beginTransaction();
 
