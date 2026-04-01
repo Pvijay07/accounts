@@ -1648,7 +1648,9 @@ window.calculateTax = function() {
                 .value) || 0;
 
             // Calculate conversion cost (deduction amount)
-            const conversionCost = (amountInINR * conversionRatePercentage) / 100;
+            const currencySelect = document.getElementById('editCurrencySelect');
+            const currency = currencySelect ? currencySelect.value : 'USD';
+            const conversionCost = currency === 'INR' ? 0 : (amountInINR * conversionRatePercentage) / 100;
 
             // Calculate receivable amount
             const receivableAmount = Math.max(0, amountInINR - conversionCost);
@@ -1670,7 +1672,9 @@ window.calculateTax = function() {
                 0;
 
             // Calculate conversion cost (deduction amount)
-            const conversionCost = (amountInINR * conversionRatePercentage) / 100;
+            const currencySelect = document.getElementById('currencySelect');
+            const currency = currencySelect ? currencySelect.value : 'USD';
+            const conversionCost = currency === 'INR' ? 0 : (amountInINR * conversionRatePercentage) / 100;
 
             // Calculate receivable amount
             const receivableAmount = Math.max(0, amountInINR - conversionCost);
@@ -2481,7 +2485,16 @@ window.calculateTax = function() {
                                 proformasTab.show();
                                 location.reload();
                             } else {
-                                alert(data.message || 'Error creating proforma');
+                                if (data.errors) {
+                                    clearValidationErrors();
+                                    Object.keys(data.errors).forEach(f => {
+                                        const el = document.getElementsByName(f)[0] || document.getElementById(f);
+                                        if (el) showValidationError(el, data.errors[f][0]);
+                                    });
+                                    showGeneralError(data.message || 'Validation Error');
+                                } else {
+                                    alert(data.message || 'Error creating proforma');
+                                }
                             }
                         })
                         .catch(error => {

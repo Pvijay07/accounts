@@ -552,7 +552,7 @@
                 }
 
                 if (!isValid) {
-                    errorElement.text(errorMessage);
+                    errorElement.text(errorMessage).addClass('show');
                     addErrorClass(fieldName);
                 }
 

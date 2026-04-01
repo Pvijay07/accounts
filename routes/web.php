@@ -124,6 +124,9 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
     Route::get('/expenses/summary', [ExpensesController::class, 'getSummary'])->name('manager.expenses.summary');
     Route::get('/expenses/table', [ExpensesController::class, 'getTable'])->name('manager.expenses.table');
     Route::get('/expenses/export', [ExpensesController::class, 'export'])->name('manager.expenses.export');
+    Route::get('/expenses/{id}/edit', [ExpensesController::class, 'edit'])->name('manager.expenses.edit');
+    Route::put('/expenses/{id}', [ExpensesController::class, 'update'])->name('manager.expenses.update');
+    Route::post('/expenses/{id}', [ExpensesController::class, 'update'])->name('manager.expenses.update.post'); // Fallback for spoofed PUT over AJAX
     Route::post('/expenses/{id}/mark-paid', [ExpensesController::class, 'markPaid'])->name('manager.expenses.mark-paid');
     Route::get('/expenses/{id}/split-history', [ExpensesController::class, 'splitHistory'])->name('manager.expenses.split');
     Route::post('/expenses/{id}/settle', [ExpensesController::class, 'markPaid'])->name('manager.expenses.settle');
@@ -134,6 +137,9 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
         Route::post('/', [IncomeController::class, 'store'])->name('income.store');
         Route::get('/export', [IncomeController::class, 'export'])->name('manager.income.export');
         Route::get('/details/{id}', [IncomeController::class, 'getIncomeDetails'])->name('manager.income.details');
+        Route::get('/{id}/edit', [IncomeController::class, 'edit'])->name('manager.income.edit');
+        Route::put('/{id}', [IncomeController::class, 'update'])->name('manager.income.update');
+        Route::post('/{id}', [IncomeController::class, 'update'])->name('manager.income.update.post'); // Fallback for spoofed PUT over AJAX
         Route::get('/{id}/split-history', [IncomeController::class, 'splitHistory'])->name('manager.income.split');
         Route::post('/{id}/settle', [IncomeController::class, 'settle'])->name('manager.income.settle');
         Route::get('/upcoming', [IncomeController::class, 'upcoming'])->name('income.upcoming');
