@@ -130,21 +130,25 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
     Route::post('/expenses/{id}/mark-paid', [ExpensesController::class, 'markPaid'])->name('manager.expenses.mark-paid');
     Route::get('/expenses/{id}/split-history', [ExpensesController::class, 'splitHistory'])->name('manager.expenses.split');
     Route::post('/expenses/{id}/settle', [ExpensesController::class, 'markPaid'])->name('manager.expenses.settle');
+    Route::get('/expenses/{id}/receipts', [ExpensesController::class, 'getReceipts'])->name('manager.expenses.receipts');
 
     // Income
     Route::prefix('income')->group(function () {
         Route::get('/', [IncomeController::class, 'index'])->name('income.index');
         Route::post('/', [IncomeController::class, 'store'])->name('income.store');
         Route::get('/export', [IncomeController::class, 'export'])->name('manager.income.export');
-        Route::get('/details/{id}', [IncomeController::class, 'getIncomeDetails'])->name('manager.income.details');
-        Route::get('/{id}/edit', [IncomeController::class, 'edit'])->name('manager.income.edit');
-        Route::put('/{id}', [IncomeController::class, 'update'])->name('manager.income.update');
-        Route::post('/{id}', [IncomeController::class, 'update'])->name('manager.income.update.post'); // Fallback for spoofed PUT over AJAX
-        Route::get('/{id}/split-history', [IncomeController::class, 'splitHistory'])->name('manager.income.split');
-        Route::post('/{id}/settle', [IncomeController::class, 'settle'])->name('manager.income.settle');
+        Route::get('/details/{id}', [IncomeController::class, 'getIncomeDetails'])->name('income.details');
+        Route::get('/{id}/edit', [IncomeController::class, 'edit'])->name('income.edit');
+        Route::put('/{id}', [IncomeController::class, 'update'])->name('income.update');
+        Route::post('/{id}', [IncomeController::class, 'update'])->name('income.update.post'); // Fallback for spoofed PUT over AJAX
+        Route::get('/{id}/split-history', [IncomeController::class, 'splitHistory'])->name('income.split');
+        Route::post('/{id}/settle', [IncomeController::class, 'settle'])->name('income.settle');
+        Route::delete('/{id}', [IncomeController::class, 'destroy'])->name('income.destroy');
+        Route::delete('/receipts/{id}', [IncomeController::class, 'deleteReceipt'])->name('income.receipts.delete');
         Route::get('/upcoming', [IncomeController::class, 'upcoming'])->name('income.upcoming');
         Route::get('/balances', [IncomeController::class, 'balance'])->name('income.balance');
         Route::post('/send-email', [IncomeController::class, 'sendEmail'])->name('income.send-email');
+        Route::get('/getIncome/{id}', [IncomeController::class, 'getIncomeDetails']); // Helper for modal consistency
     });
 
     // GST Routes

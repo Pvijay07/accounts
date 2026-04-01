@@ -15,6 +15,8 @@ use App\Traits\ManagesCompanies;
 use App\Exports\ExpenseExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ExpensesController extends Controller
 {
@@ -1452,7 +1454,7 @@ class ExpensesController extends Controller
         $exists = file_exists($serverPath);
         \Log::info('  - File exists on server: ' . ($exists ? 'YES' : 'NO'));
 
-        $fileUrl = asset('public/' . $receipt->file_path);
+        $fileUrl = asset($receipt->file_path);
 
         return [
           'id'          => $receipt->id,

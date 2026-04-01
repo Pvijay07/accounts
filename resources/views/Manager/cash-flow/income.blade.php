@@ -1,5 +1,5 @@
-@extends('Manager.layouts.app')
-@section('content')
+@extends( 'Manager.layouts.app' )
+@section( 'content' )
 <div id="income" class="manager-panel">
     <!-- Date Range & Filter Section -->
     <div class="filter-section mb-4">
@@ -19,7 +19,7 @@
                 <label class="form-label small fw-bold">Company</label>
                 <select class="form-select form-select-sm" id="companyFilter" onchange="applyFilters()">
                     <option value="">All Companies</option>
-                    @foreach ($companies as $company)
+                    @foreach ( $companies as $company )
                     <option value="{{ $company->id }}" {{ $companyId == $company->id ? 'selected' : '' }}>
                         {{ $company->name }}
                     </option>
@@ -68,7 +68,7 @@
                     <div class="d-flex justify-content-between align-items-end">
                         <div>
                             <h3 class="mb-0" id="totalPayments">
-                                ₹{{ number_format($stats['totalPayments'] ?? 0, 2) }}
+                                ₹{{ number_format ( $stats['totalPayments'] ?? 0, 2 ) }}
                             </h3>
                             <small class="text-muted">{{ $stats['paymentItems'] ?? 0 }} Items</small>
                         </div>
@@ -89,7 +89,7 @@
                     <div class="d-flex justify-content-between align-items-end">
                         <div>
                             <h3 class="mb-0" id="receivedAmount">
-                                ₹{{ number_format($stats['totalReceived'] ?? 0, 2) }}</h3>
+                                ₹{{ number_format ( $stats['totalReceived'] ?? 0, 2 ) }}</h3>
                             <small class="text-muted">{{ $stats['receivedItems'] ?? 0 }} items</small>
                         </div>
                         <div class="summary-icon">
@@ -109,7 +109,7 @@
                     <div class="d-flex justify-content-between align-items-end">
                         <div>
                             <h3 class="mb-0" id="pendingAmount">
-                                ₹{{ number_format($stats['totalPending'] ?? 0, 2) }}
+                                ₹{{ number_format ( $stats['totalPending'] ?? 0, 2 ) }}
                             </h3>
                             <small class="text-muted">{{ $stats['pendingItems'] ?? 0 }} items</small>
                         </div>
@@ -129,7 +129,7 @@
                 <div class="summary-body">
                     <div class="d-flex justify-content-between align-items-end">
                         <div>
-                            <h3 class="mb-0" id="overdueAmount">₹{{ number_format($stats['overdue'] ?? 0, 2) }}
+                            <h3 class="mb-0" id="overdueAmount">₹{{ number_format ( $stats['overdue'] ?? 0, 2 ) }}
                             </h3>
                             <small class="text-muted">{{ $stats['overdueItems'] ?? 0 }} items</small>
                         </div>
@@ -150,7 +150,7 @@
                     <div class="d-flex justify-content-between align-items-end">
                         <div>
                             <h3 class="mb-0" id="totalOverdueAmount">
-                                ₹{{ number_format($stats['totalOverdue'] ?? 0, 2) }}</h3>
+                                ₹{{ number_format ( $stats['totalOverdue'] ?? 0, 2 ) }}</h3>
                             <small class="text-muted">{{ $stats['totalOverdueItems'] ?? 0 }} items</small>
                         </div>
                         <div class="summary-icon">
@@ -172,19 +172,19 @@
                 <div class="summary-body">
                     <div class="btn-group w-100">
                         <button
-                            class="btn btn-outline-primary {{ request('status') == 'all' || !request('status') ? 'active' : '' }}"
+                            class="btn btn-outline-primary {{ request ( 'status' ) == 'all' || !request ( 'status' ) ? 'active' : '' }}"
                             onclick="filterPayments('all')" id="btnAll">
                             All Payments
                         </button>
-                        <button class="btn btn-outline-warning {{ request('status') == 'pending' ? 'active' : '' }}"
+                        <button class="btn btn-outline-warning {{ request ( 'status' ) == 'pending' ? 'active' : '' }}"
                             onclick="filterPayments('pending')" id="btnPending">
                             Only Pending
                         </button>
-                        <button class="btn btn-outline-info {{ request('status') == 'upcoming' ? 'active' : '' }}"
+                        <button class="btn btn-outline-info {{ request ( 'status' ) == 'upcoming' ? 'active' : '' }}"
                             onclick="filterPayments('upcoming')" id="btnUpcoming">
                             Only Upcoming
                         </button>
-                        <button class="btn btn-outline-success {{ request('status') == 'received' ? 'active' : '' }}"
+                        <button class="btn btn-outline-success {{ request ( 'status' ) == 'received' ? 'active' : '' }}"
                             onclick="filterPayments('received')" id="btnReceived">
                             Only Received
                         </button>
@@ -221,7 +221,7 @@
                         </tr>
                     </thead>
                     <tbody id="incomeTableBody">
-                        @foreach ($incomes as $income)
+                        @foreach ( $incomes as $income )
                         <tr>
                             <td>
                                 <strong>{{ $income->company->name ?? 'N/A' }}</strong>
@@ -229,11 +229,11 @@
                             <td>{{ $income->client_name }}</td>
 
                             <td>
-                                <strong>₹{{ number_format($income->planned_amount ?? $income->amount, 2) }}</strong>
+                                <strong>₹{{ number_format ( $income->planned_amount ?? $income->amount, 2 ) }}</strong>
                             </td>
                             <td>
                                 <strong class="{{ $income->actual_amount > 0 ? 'text-success' : 'text-muted' }}">
-                                    ₹{{ number_format($income->actual_amount ?? 0, 2) }}
+                                    ₹{{ number_format ( $income->actual_amount ?? 0, 2 ) }}
                                 </strong>
                             </td>
 
@@ -258,10 +258,10 @@
                                 ];
                                 @endphp
                                 <span class="badge bg-{{ $statusColors[$income->status] ?? 'secondary' }}">
-                                    {{ $statusText[$income->status] ?? ucfirst($income->status) }}
+                                    {{ $statusText[$income->status] ?? ucfirst ( $income->status ) }}
                                 </span>
                             </td>
-                            <td>{{ \Carbon\Carbon::parse($income->created_at)->format('d M Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse ( $income->created_at )->format ( 'd M Y' ) }}</td>
                             <td>
                                 <span class="badge {{ $income->mail_status ? 'bg-success' : 'bg-secondary' }}">
                                     {{ $income->mail_status ? 'Yes' : 'No' }}
@@ -269,7 +269,7 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    @if ($income->status != 'received')
+                                    @if ( $income->status != 'received' )
                                     {{-- <button class="btn btn-sm btn-outline-success"
                                                     onclick="openReceivePaymentModal({{ $income->id }})">
                                     <i class="fas fa-check me-1"></i> Receive Payment
@@ -287,24 +287,21 @@
 
                                         </button>
                                         <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                            data-bs-target="#sendInvoiceModal"
-                                            data-income-id="{{ $income->id }}">
+                                            data-bs-target="#sendInvoiceModal" data-income-id="{{ $income->id }}">
                                             <i class="fas fa-envelope"></i>
                                         </button>
                                         {{-- <button class="btn btn-outline-info"
                                                     onclick="downloadProforma({{ $income->id }})">
                                         <i class="fas fa-download"></i>
                                         </button> --}}
-                                        @if ($income->is_split || $income->parent_id)
+                                        @if ( $income->is_split || $income->parent_id )
                                         <button class="btn btn-outline-info btn-sm ms-1"
-                                            onclick="viewSplitHistory({{ $income->id }})"
-                                            title="View Split History">
+                                            onclick="viewSplitHistory({{ $income->id }})" title="View Split History">
                                             <i class="fas fa-code-branch"></i>
                                         </button>
                                         @endif
                                         <button class="btn btn-outline-danger btn-sm ms-1"
-                                            onclick="deleteIncome({{ $income->id }})"
-                                            title="Delete Income">
+                                            onclick="deleteIncome({{ $income->id }})" title="Delete Income">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -317,15 +314,15 @@
             </div>
 
             <!-- Pagination -->
-            @if ($incomes->hasPages())
+            @if ( $incomes->hasPages () )
             <div class="d-flex justify-content-between align-items-center mt-3">
                 <div class="text-muted">
-                    Showing {{ $incomes->firstItem() }} to {{ $incomes->lastItem() }} of
-                    {{ $incomes->total() }}
+                    Showing {{ $incomes->firstItem () }} to {{ $incomes->lastItem () }} of
+                    {{ $incomes->total () }}
                     entries
                 </div>
                 <div>
-                    {{ $incomes->links() }}
+                    {{ $incomes->links () }}
                 </div>
             </div>
             @endif
@@ -404,8 +401,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Payment Date *</label>
-                            <input type="date" class="form-control" id="paymentDate" name="payment_date"
-                                required>
+                            <input type="date" class="form-control" id="paymentDate" name="payment_date" required>
                         </div>
                     </div>
 
@@ -454,7 +450,7 @@
                             <label for="companyId" class="form-label">Company *</label>
                             <select class="form-select" id="companyId" name="company_id" required>
                                 <option value="">Select Company</option>
-                                @foreach ($companies as $company)
+                                @foreach ( $companies as $company )
                                 <option value="{{ $company->id }}">{{ $company->name }}</option>
                                 @endforeach
                             </select>
@@ -465,8 +461,8 @@
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="actualAmount" class="form-label">Actual Amount *</label>
-                            <input type="number" step="0.01" class="form-control" id="actualAmount"
-                                name="amount" value="" required placeholder="0.00">
+                            <input type="number" step="0.01" class="form-control" id="actualAmount" name="amount"
+                                value="" required placeholder="0.00">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="originalTotalBase" class="form-label">Original Total (Base)</label>
@@ -499,8 +495,7 @@
                                     <label class="form-label">GST %</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="gst_percentage"
-                                            name="gst_percentage" value="18" min="0" max="100"
-                                            step="0.01">
+                                            name="gst_percentage" value="18" min="0" max="100" step="0.01">
                                         <span class="input-group-text">%</span>
                                     </div>
                                 </div>
@@ -524,8 +519,7 @@
                                     <label class="form-label">TDS %</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="tds_percentage"
-                                            name="tds_percentage" value="10" min="0" max="100"
-                                            step="0.01">
+                                            name="tds_percentage" value="10" min="0" max="100" step="0.01">
                                         <span class="input-group-text">%</span>
                                     </div>
                                 </div>
@@ -538,8 +532,8 @@
 
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Amount After TDS</label>
-                                <input type="number" class="form-control" id="amount_after_tds"
-                                    name="amount_after_tds" readonly>
+                                <input type="number" class="form-control" id="amount_after_tds" name="amount_after_tds"
+                                    readonly>
                             </div>
 
                             <div class="row mb-3">
@@ -560,8 +554,7 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Grand Total</label>
-                                <input type="number" class="form-control" id="grand_total" name="grand_total"
-                                    readonly>
+                                <input type="number" class="form-control" id="grand_total" name="grand_total" readonly>
                             </div>
                         </div>
 
@@ -569,8 +562,8 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Amount Received</label>
-                                <input type="number" class="form-control" id="received_amount"
-                                    name="received_amount" step="0.01" value="0.00">
+                                <input type="number" class="form-control" id="received_amount" name="received_amount"
+                                    step="0.01" value="0.00">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Received Payment Date</label>
@@ -585,8 +578,8 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="dueDay" class="form-label">Due Day</label>
-                            <input type="number" min="1" max="31" class="form-control" id="dueDay"
-                                name="due_day" placeholder="Day of month">
+                            <input type="number" min="1" max="31" class="form-control" id="dueDay" name="due_day"
+                                placeholder="Day of month">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="status" class="form-label">Status *</label>
@@ -644,15 +637,14 @@
                             <label class="form-label required">Company</label>
                             <select class="form-select" id="editCompanyId" name="company_id" required>
                                 <option value="">Select Company</option>
-                                @foreach ($companies as $company)
+                                @foreach ( $companies as $company )
                                 <option value="{{ $company->id }}">{{ $company->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label required">Client Name</label>
-                            <input type="text" class="form-control" id="editClientName" name="client_name"
-                                required>
+                            <input type="text" class="form-control" id="editClientName" name="client_name" required>
                         </div>
                     </div>
 
@@ -672,8 +664,8 @@
                             <label class="form-label">Paid Amount (₹)</label>
                             <div class="input-group">
                                 <span class="input-group-text">₹</span>
-                                <input type="number" class="form-control" id="editPaidAmount"
-                                    name="received_amount" step="0.01" min="0">
+                                <input type="number" class="form-control" id="editPaidAmount" name="received_amount"
+                                    step="0.01" min="0">
                             </div>
                         </div>
                         <div class="row">
@@ -697,8 +689,8 @@
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Upload Receipts</label>
                                 <div class="input-group">
-                                    <input type="file" class="form-control" id="editReceipts" name="receipts[]"
-                                        multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
+                                    <input type="file" class="form-control" id="editReceipts" name="receipts[]" multiple
+                                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
                                     <label class="input-group-text" for="editReceipts">
                                         <i class="fas fa-paperclip"></i>
                                     </label>
@@ -714,8 +706,8 @@
                             <label class="form-label">Balance Amount</label>
                             <div class="input-group">
                                 <span class="input-group-text">₹</span>
-                                <input type="number" class="form-control" id="editBalanceAmount"
-                                    name="balance_amount" step="0.01" min="0" readonly>
+                                <input type="number" class="form-control" id="editBalanceAmount" name="balance_amount"
+                                    step="0.01" min="0" readonly>
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -743,8 +735,8 @@
                             <!-- GST Section -->
                             <div class="d-flex justify-content-between mb-2">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="apply_gst"
-                                        id="editApplyGst" value="1" checked>
+                                    <input class="form-check-input" type="checkbox" name="apply_gst" id="editApplyGst"
+                                        value="1" checked>
                                     <label class="form-check-label" for="editApplyGst">Apply GST</label>
                                 </div>
                             </div>
@@ -753,8 +745,7 @@
                                     <label class="form-label">GST %</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="editGstPercentage"
-                                            name="gst_percentage" value="18" min="0" max="100"
-                                            step="0.01">
+                                            name="gst_percentage" value="18" min="0" max="100" step="0.01">
                                         <span class="input-group-text">%</span>
                                     </div>
                                 </div>
@@ -771,8 +762,8 @@
                             <!-- TDS Section -->
                             <div class="d-flex justify-content-between mb-2">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="apply_tds"
-                                        id="editApplyTds" value="1" checked>
+                                    <input class="form-check-input" type="checkbox" name="apply_tds" id="editApplyTds"
+                                        value="1" checked>
                                     <label class="form-check-label" for="editApplyTds">Apply TDS</label>
                                 </div>
                             </div>
@@ -781,8 +772,7 @@
                                     <label class="form-label">TDS %</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="editTdsPercentage"
-                                            name="tds_percentage" value="10" min="0" max="100"
-                                            step="0.01">
+                                            name="tds_percentage" value="10" min="0" max="100" step="0.01">
                                         <span class="input-group-text">%</span>
                                     </div>
                                 </div>
@@ -804,8 +794,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Receipt</label>
-                                    <input type="file" id="editTdsReceipt" name="tds_receipt"
-                                        class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
+                                    <input type="file" id="editTdsReceipt" name="tds_receipt" class="form-control"
+                                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
                                 </div>
                             </div>
                         </div>
@@ -848,8 +838,7 @@
     </div>
 </div>
 <!-- Add this modal to your HTML if not present -->
-<div class="modal fade" id="viewInvoiceModal" tabindex="-1" aria-labelledby="viewInvoiceModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="viewInvoiceModal" tabindex="-1" aria-labelledby="viewInvoiceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -879,7 +868,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="sendInvoiceForm" method="POST" action="{{ route('income.send-email') }}">
+                <form id="sendInvoiceForm" method="POST" action="{{ route ( 'income.send-email' ) }}">
                     @csrf
                     <input type="hidden" name="invoice_id" id="send_invoice_id">
                     <input type="hidden" name="income_id" id="send_income_id">
@@ -911,7 +900,8 @@
 
                         <div class="col-12">
                             <label class="form-label">Message Body *</label>
-                            <textarea class="form-control" id="send_message" name="message" rows="6" required></textarea>
+                            <textarea class="form-control" id="send_message" name="message" rows="6"
+                                required></textarea>
                             {{-- <small class="text-muted">
                                     Available variables: {client_name}, {invoice_no}, {due_date}, {amount}, {company_name}
                                 </small> --}}
@@ -1040,7 +1030,7 @@
         document.getElementById('modalTitle').textContent = 'Add Non-standard Income';
         document.getElementById('incomeForm').reset();
         document.getElementById('incomeId').value = '';
-        document.getElementById('incomeDate').value = '{{ date("Y-m-d") }}';
+        document.getElementById('incomeDate').value = '{{ date ( "Y-m-d" ) }}';
         document.getElementById('status').value = 'pending';
         document.getElementById('mailStatus').value = '0';
 
@@ -1326,7 +1316,7 @@
     async function openReceivePaymentModal(incomeId) {
         try {
             const response = await fetch(
-                `/manager/income/${incomeId}/details`);
+                `/manager/income/details/${incomeId}`);
             const data = await response.json();
 
             if (data.success) {
@@ -1500,25 +1490,25 @@
     function deleteIncome(incomeId) {
         if (confirm('Are you sure you want to delete this income? This action cannot be undone.')) {
             fetch(`/manager/income/${incomeId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('success', data.message);
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showNotification('error', data.message || 'Error deleting income');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('error', 'Failed to delete income');
-            });
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token () }}',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('success', data.message);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showNotification('error', data.message || 'Error deleting income');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('error', 'Failed to delete income');
+                });
         }
     }
 
@@ -1533,22 +1523,22 @@
         notification.className =
             `custom-notification alert alert-${type === 'success' ? 'success' : 'danger'}`;
         notification.style.cssText = `
-                                                                position: fixed;
-                                                                top: 20px;
-                                                                right: 20px;
-                                                                z-index: 9999;
-                                                                padding: 15px 20px;
-                                                                border-radius: 5px;
-                                                                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                                                                min-width: 300px;
-                                                                max-width: 400px;
-                                                            `;
+                                                                    position: fixed;
+                                                                    top: 20px;
+                                                                    right: 20px;
+                                                                    z-index: 9999;
+                                                                    padding: 15px 20px;
+                                                                    border-radius: 5px;
+                                                                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                                                                    min-width: 300px;
+                                                                    max-width: 400px;
+                                                                `;
         notification.innerHTML = `
-                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                    <span>${message}</span>
-                                                                    <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
-                                                                </div>
-                                                            `;
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <span>${message}</span>
+                                                                        <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+                                                                    </div>
+                                                                `;
 
         document.body.appendChild(notification);
 
@@ -2087,52 +2077,52 @@
                 // Show parent expense if this is a child
                 if (data.parent_expense) {
                     historyHTML += `
-                    <div class="card mb-3 border-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h6 class="mb-0">Original Expense (Parent)</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <strong>Expense ID:</strong><br>
-                                    <span class="badge bg-primary">#${data.parent_expense.id}</span>
-                                </div>
-                                <div class="col-md-3">
-                                    <strong>Original Amount:</strong><br>
-                                    ₹${parseFloat(data.parent_expense.planned_amount).toFixed(2)}
-                                </div>
-                                <div class="col-md-3">
-                                    <strong>Created Date:</strong><br>
-                                    ${new Date(data.parent_expense.created_at).toLocaleDateString()}
-                                </div>
-                                <div class="col-md-3">
-                                    <strong>Split Status:</strong><br>
-                                    <span class="badge bg-warning">Split Initiated</span>
+                        <div class="card mb-3 border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">Original Expense (Parent)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Expense ID:</strong><br>
+                                        <span class="badge bg-primary">#${data.parent_expense.id}</span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Original Amount:</strong><br>
+                                        ₹${parseFloat(data.parent_expense.planned_amount).toFixed(2)}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Created Date:</strong><br>
+                                        ${new Date(data.parent_expense.created_at).toLocaleDateString()}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Split Status:</strong><br>
+                                        <span class="badge bg-warning">Split Initiated</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
                 }
 
                 // Show all children (split transactions)
                 if (data.children.length > 0) {
                     historyHTML += `
-                    <h6 class="mt-4 mb-3">Split Transactions:</h6>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Split #</th>
-                                    <th>Expense ID</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Created Date</th>
-                                    <th>Paid Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
+                        <h6 class="mt-4 mb-3">Split Transactions:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Split #</th>
+                                        <th>Expense ID</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Created Date</th>
+                                        <th>Paid Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
 
                     data.children.forEach((child, index) => {
                         const statusClass = {
@@ -2143,61 +2133,61 @@
                         } [child.status] || 'secondary';
 
                         historyHTML += `
-                        <tr ${child.id == expenseId ? 'class="table-info"' : ''}>
-                            <td>${index + 1}</td>
-                            <td>
-                                <span class="badge bg-${child.id == expenseId ? 'primary' : 'secondary'}">
-                                    #${child.id}
-                                </span>
-                            </td>
-                            <td>₹${parseFloat(child.planned_amount).toFixed(2)}</td>
-                            <td>
-                                <span class="badge bg-${statusClass}">
-                                    ${child.status}
-                                </span>
-                            </td>
-                            <td>${new Date(child.created_at).toLocaleDateString()}</td>
-                            <td>${child.paid_date ? new Date(child.paid_date).toLocaleDateString() : '-'}</td>
-                        </tr>
-                    `;
+                            <tr ${child.id == expenseId ? 'class="table-info"' : ''}>
+                                <td>${index + 1}</td>
+                                <td>
+                                    <span class="badge bg-${child.id == expenseId ? 'primary' : 'secondary'}">
+                                        #${child.id}
+                                    </span>
+                                </td>
+                                <td>₹${parseFloat(child.planned_amount).toFixed(2)}</td>
+                                <td>
+                                    <span class="badge bg-${statusClass}">
+                                        ${child.status}
+                                    </span>
+                                </td>
+                                <td>${new Date(child.created_at).toLocaleDateString()}</td>
+                                <td>${child.paid_date ? new Date(child.paid_date).toLocaleDateString() : '-'}</td>
+                            </tr>
+                        `;
                     });
 
                     historyHTML += `
-                            </tbody>
-                        </table>
-                    </div>
-                `;
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
                 }
 
                 // Show summary
                 if (data.summary) {
                     historyHTML += `
-                    <div class="card mt-4 border-success">
-                        <div class="card-header bg-success text-white">
-                            <h6 class="mb-0">Split Summary</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-md-3">
-                                    <div class="text-muted">Original Amount</div>
-                                    <div class="h5">₹${parseFloat(data.summary.original_amount).toFixed(2)}</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-muted">Total Paid</div>
-                                    <div class="h5 text-success">₹${parseFloat(data.summary.total_paid).toFixed(2)}</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-muted">Total Balance</div>
-                                    <div class="h5 text-warning">₹${parseFloat(data.summary.total_balance).toFixed(2)}</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-muted">Split Count</div>
-                                    <div class="h5">${data.summary.split_count}</div>
+                        <div class="card mt-4 border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">Split Summary</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="text-muted">Original Amount</div>
+                                        <div class="h5">₹${parseFloat(data.summary.original_amount).toFixed(2)}</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-muted">Total Paid</div>
+                                        <div class="h5 text-success">₹${parseFloat(data.summary.total_paid).toFixed(2)}</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-muted">Total Balance</div>
+                                        <div class="h5 text-warning">₹${parseFloat(data.summary.total_balance).toFixed(2)}</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-muted">Split Count</div>
+                                        <div class="h5">${data.summary.split_count}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
                 }
 
                 splitHistoryContent.innerHTML = historyHTML;
@@ -2494,19 +2484,19 @@
         const notification = document.createElement('div');
         notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
         notification.style.cssText = `
-                                                            position: fixed;
-                                                            top: 20px;
-                                                            right: 20px;
-                                                            z-index: 9999;
-                                                            min-width: 300px;
-                                                            max-width: 400px;
-                                                        `;
+                                                                position: fixed;
+                                                                top: 20px;
+                                                                right: 20px;
+                                                                z-index: 9999;
+                                                                min-width: 300px;
+                                                                max-width: 400px;
+                                                            `;
         notification.innerHTML = `
-                                                            <div class="d-flex justify-content-between align-items-center">
-                                                                <span>${message}</span>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                                            </div>
-                                                        `;
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <span>${message}</span>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                                                </div>
+                                                            `;
 
         document.body.appendChild(notification);
 
@@ -2518,7 +2508,7 @@
     function viewProforma(id) {
         console.log('Fetching invoice data for ID:', id);
 
-        fetch(`/manager/getIncome/${id}`)
+        fetch(`/manager/income/getIncome/${id}`)
             .then(response => {
                 console.log('Response status:', response.status);
                 if (!response.ok) {
@@ -2539,13 +2529,20 @@
                         return;
                     }
 
+                    if (!invoice) {
+                        content.innerHTML = '<div class="alert alert-warning">No invoice associated with this income.</div>';
+                        const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
+                        modal.show();
+                        return;
+                    }
+
                     // Calculate amounts excluding TDS
                     let gstTotal = 0;
                     let tdsTotal = 0;
                     let gstItems = [];
                     let tdsItems = [];
 
-                    if (invoice.taxes && invoice.taxes.length > 0) {
+                    if (invoice && invoice.taxes && invoice.taxes.length > 0) {
                         console.log('Taxes found:', invoice.taxes);
 
                         // Separate GST and TDS
@@ -2576,13 +2573,13 @@
                     if (invoice.line_items && invoice.line_items.length > 0) {
                         invoice.line_items.forEach(item => {
                             lineItemsHtml += `
-                                                                        <tr>
-                                                                            <td>${item.description || 'Item'}</td>
-                                                                            <td class="text-end">${item.quantity || 1}</td>
-                                                                            <td class="text-end">₹${parseFloat(item.rate || 0).toFixed(2)}</td>
-                                                                            <td class="text-end">₹${parseFloat(item.amount || 0).toFixed(2)}</td>
-                                                                        </tr>
-                                                                    `;
+                                                                            <tr>
+                                                                                <td>${item.description || 'Item'}</td>
+                                                                                <td class="text-end">${item.quantity || 1}</td>
+                                                                                <td class="text-end">₹${parseFloat(item.rate || 0).toFixed(2)}</td>
+                                                                                <td class="text-end">₹${parseFloat(item.amount || 0).toFixed(2)}</td>
+                                                                            </tr>
+                                                                        `;
                         });
                     }
 
@@ -2592,38 +2589,38 @@
                     if (gstItems.length > 0) {
                         // Display GST breakdown
                         gstHtml = `
-                                                                    <h6 class="mt-4">GST Details</h6>
-                                                                    <table class="table table-sm">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th>GST Type</th>
-                                                                                <th class="text-end">Percentage</th>
-                                                                                <th class="text-end">Amount</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                `;
+                                                                        <h6 class="mt-4">GST Details</h6>
+                                                                        <table class="table table-sm">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>GST Type</th>
+                                                                                    <th class="text-end">Percentage</th>
+                                                                                    <th class="text-end">Amount</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                    `;
 
                         gstItems.forEach(tax => {
                             gstHtml += `
-                                                                        <tr>
-                                                                            <td>${tax.tax_type.toUpperCase()}</td>
-                                                                            <td class="text-end">${parseFloat(tax.tax_percentage || 0).toFixed(2)}%</td>
-                                                                            <td class="text-end">₹${parseFloat(tax.tax_amount || 0).toFixed(2)}</td>
-                                                                        </tr>
-                                                                    `;
+                                                                            <tr>
+                                                                                <td>${tax.tax_type.toUpperCase()}</td>
+                                                                                <td class="text-end">${parseFloat(tax.tax_percentage || 0).toFixed(2)}%</td>
+                                                                                <td class="text-end">₹${parseFloat(tax.tax_amount || 0).toFixed(2)}</td>
+                                                                            </tr>
+                                                                        `;
                         });
 
                         gstHtml += `
-                                                                        </tbody>
-                                                                        <tfoot>
-                                                                            <tr>
-                                                                                <th colspan="2" class="text-end">Total GST:</th>
-                                                                                <td class="text-end"><strong>₹${gstTotal.toFixed(2)}</strong></td>
-                                                                            </tr>
-                                                                        </tfoot>
-                                                                    </table>
-                                                                `;
+                                                                            </tbody>
+                                                                            <tfoot>
+                                                                                <tr>
+                                                                                    <th colspan="2" class="text-end">Total GST:</th>
+                                                                                    <td class="text-end"><strong>₹${gstTotal.toFixed(2)}</strong></td>
+                                                                                </tr>
+                                                                            </tfoot>
+                                                                        </table>
+                                                                    `;
                     }
 
                     // Format dates properly
@@ -2643,106 +2640,106 @@
                     };
 
                     const html = `
-                                                                <div class="container-fluid">
-                                                                    <div class="row mb-4">
-                                                                        <div class="col-md-8">
-                                                                            <h5>Invoice Details</h5>
-                                                                            <table class="table table-sm">
-                                                                                <tr>
-                                                                                    <th width="150">Invoice Number:</th>
-                                                                                    <td>${invoice.invoice_number || 'N/A'}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Company:</th>
-                                                                                    <td>${invoice.company?.name || 'N/A'}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Client:</th>
-                                                                                    <td>${invoice.client_details?.name || 'N/A'}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Email:</th>
-                                                                                    <td>${invoice.client_details?.email || 'N/A'}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>GSTIN:</th>
-                                                                                    <td>${invoice.client_details?.gstin || 'N/A'}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Tax Type:</th>
-                                                                                    <td>${invoice.tax_type || 'N/A'}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Issue Date:</th>
-                                                                                    <td>${formatDate(invoice.issue_date)}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Due Date:</th>
-                                                                                    <td>${formatDate(invoice.due_date)}</td>
-                                                                                </tr>
-                                                                            </table>
-                                                                        </div>
-                                                                        <div class="col-md-4 text-end">
-                                                                            <div class="alert ${invoice.status === 'pending' ? 'alert-warning' : invoice.status === 'received' ? 'alert-success' : invoice.status === 'overdue' ? 'alert-danger' : 'alert-secondary'}">
-                                                                                <strong>Status:</strong> ${(invoice.status || '').toUpperCase()}<br>
-                                                                                <strong>Type:</strong> ${(invoice.type || 'invoice').toUpperCase()}
+                                                                    <div class="container-fluid">
+                                                                        <div class="row mb-4">
+                                                                            <div class="col-md-8">
+                                                                                <h5>Invoice Details</h5>
+                                                                                <table class="table table-sm">
+                                                                                    <tr>
+                                                                                        <th width="150">Invoice Number:</th>
+                                                                                        <td>${invoice.invoice_number || 'N/A'}</td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Company:</th>
+                                                                                        <td>${invoice.company?.name || 'N/A'}</td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Client:</th>
+                                                                                        <td>${invoice.client_details?.name || 'N/A'}</td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Email:</th>
+                                                                                        <td>${invoice.client_details?.email || 'N/A'}</td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>GSTIN:</th>
+                                                                                        <td>${invoice.client_details?.gstin || 'N/A'}</td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Tax Type:</th>
+                                                                                        <td>${invoice.tax_type || 'N/A'}</td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Issue Date:</th>
+                                                                                        <td>${formatDate(invoice.issue_date)}</td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Due Date:</th>
+                                                                                        <td>${formatDate(invoice.due_date)}</td>
+                                                                                    </tr>
+                                                                                </table>
+                                                                            </div>
+                                                                            <div class="col-md-4 text-end">
+                                                                                <div class="alert ${invoice.status === 'pending' ? 'alert-warning' : invoice.status === 'received' ? 'alert-success' : invoice.status === 'overdue' ? 'alert-danger' : 'alert-secondary'}">
+                                                                                    <strong>Status:</strong> ${(invoice.status || '').toUpperCase()}<br>
+                                                                                    <strong>Type:</strong> ${(invoice.type || 'invoice').toUpperCase()}
+                                                                                </div>
                                                                             </div>
                                                                         </div>
+
+                                                                        <h6>Line Items</h6>
+                                                                        <table class="table table-sm">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Description</th>
+                                                                                    <th class="text-end">Qty</th>
+                                                                                    <th class="text-end">Rate</th>
+                                                                                    <th class="text-end">Amount</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                ${lineItemsHtml || '<tr><td colspan="4" class="text-center">No line items found</td></tr>'}
+                                                                            </tbody>
+                                                                            <tfoot>
+                                                                                <tr>
+                                                                                    <th colspan="3" class="text-end">Subtotal:</th>
+                                                                                    <td class="text-end">₹${subtotal.toFixed(2)}</td>
+                                                                                </tr>
+                                                                                ${gstTotal > 0 ? `
+                                                                                                                                                                    <tr>
+                                                                                                                                                                        <th colspan="3" class="text-end">GST (${gstItems[0]?.tax_percentage || 0}%):</th>
+                                                                                                                                                                        <td class="text-end">₹${gstTotal.toFixed(2)}</td>
+                                                                                                                                                                    </tr>
+                                                                                                                                                                ` : ''}
+                                                                                <tr>
+                                                                                    <th colspan="3" class="text-end">Total (excluding TDS):</th>
+                                                                                    <td class="text-end"><strong>₹${totalWithoutTds.toFixed(2)}</strong></td>
+                                                                                </tr>
+
+                                                                                <tr class="border-top">
+                                                                                    <th colspan="3" class="text-end">Net Amount Payable:</th>
+                                                                                    <td class="text-end"><strong>₹${parseFloat(invoice.total_amount || totalWithoutTds - tdsTotal).toFixed(2)}</strong></td>
+                                                                                </tr>
+                                                                            </tfoot>
+                                                                        </table>
+
+                                                                        ${gstHtml}
+
+                                                                        ${invoice.purpose_comment ? `
+                                                                                                                                                            <div class="mt-3">
+                                                                                                                                                                <h6>Purpose Comment</h6>
+                                                                                                                                                                <p class="text-muted">${invoice.purpose_comment}</p>
+                                                                                                                                                            </div>
+                                                                                                                                                        ` : ''}
+
+                                                                        ${invoice.terms_conditions ? `
+                                                                                                                                                            <div class="mt-3">
+                                                                                                                                                                <h6>Terms & Conditions</h6>
+                                                                                                                                                                <div class="text-muted" style="white-space: pre-line;">${invoice.terms_conditions}</div>
+                                                                                                                                                            </div>
+                                                                                                                                                        ` : ''}
                                                                     </div>
-
-                                                                    <h6>Line Items</h6>
-                                                                    <table class="table table-sm">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th>Description</th>
-                                                                                <th class="text-end">Qty</th>
-                                                                                <th class="text-end">Rate</th>
-                                                                                <th class="text-end">Amount</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            ${lineItemsHtml || '<tr><td colspan="4" class="text-center">No line items found</td></tr>'}
-                                                                        </tbody>
-                                                                        <tfoot>
-                                                                            <tr>
-                                                                                <th colspan="3" class="text-end">Subtotal:</th>
-                                                                                <td class="text-end">₹${subtotal.toFixed(2)}</td>
-                                                                            </tr>
-                                                                            ${gstTotal > 0 ? `
-                                                                                                                                                                <tr>
-                                                                                                                                                                    <th colspan="3" class="text-end">GST (${gstItems[0]?.tax_percentage || 0}%):</th>
-                                                                                                                                                                    <td class="text-end">₹${gstTotal.toFixed(2)}</td>
-                                                                                                                                                                </tr>
-                                                                                                                                                            ` : ''}
-                                                                            <tr>
-                                                                                <th colspan="3" class="text-end">Total (excluding TDS):</th>
-                                                                                <td class="text-end"><strong>₹${totalWithoutTds.toFixed(2)}</strong></td>
-                                                                            </tr>
-
-                                                                            <tr class="border-top">
-                                                                                <th colspan="3" class="text-end">Net Amount Payable:</th>
-                                                                                <td class="text-end"><strong>₹${parseFloat(invoice.total_amount || totalWithoutTds - tdsTotal).toFixed(2)}</strong></td>
-                                                                            </tr>
-                                                                        </tfoot>
-                                                                    </table>
-
-                                                                    ${gstHtml}
-
-                                                                    ${invoice.purpose_comment ? `
-                                                                                                                                                        <div class="mt-3">
-                                                                                                                                                            <h6>Purpose Comment</h6>
-                                                                                                                                                            <p class="text-muted">${invoice.purpose_comment}</p>
-                                                                                                                                                        </div>
-                                                                                                                                                    ` : ''}
-
-                                                                    ${invoice.terms_conditions ? `
-                                                                                                                                                        <div class="mt-3">
-                                                                                                                                                            <h6>Terms & Conditions</h6>
-                                                                                                                                                            <div class="text-muted" style="white-space: pre-line;">${invoice.terms_conditions}</div>
-                                                                                                                                                        </div>
-                                                                                                                                                    ` : ''}
-                                                                </div>
-                                                            `;
+                                                                `;
 
                     console.log('Setting HTML content');
                     content.innerHTML = html;
@@ -2774,29 +2771,29 @@
         if (content) {
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
-                                                            <!DOCTYPE html>
-                                                            <html>
-                                                            <head>
-                                                                <title>Invoice Print</title>
-                                                                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                                                                <style>
-                                                                    @media print {
-                                                                        body { margin: 0; padding: 20px; }
-                                                                        .no-print { display: none !important; }
-                                                                    }
-                                                                    .invoice-header { border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; }
-                                                                    .total-row { font-weight: bold; }
-                                                                </style>
-                                                            </head>
-                                                            <body>
-                                                                ${content.innerHTML}
-                                                                <div class="text-center mt-4 no-print">
-                                                                    <button class="btn btn-primary" onclick="window.print()">Print</button>
-                                                                    <button class="btn btn-secondary" onclick="window.close()">Close</button>
-                                                                </div>
-                                                            </body>
-                                                            </html>
-                                                        `);
+                                                                <!DOCTYPE html>
+                                                                <html>
+                                                                <head>
+                                                                    <title>Invoice Print</title>
+                                                                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                                                                    <style>
+                                                                        @media print {
+                                                                            body { margin: 0; padding: 20px; }
+                                                                            .no-print { display: none !important; }
+                                                                        }
+                                                                        .invoice-header { border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; }
+                                                                        .total-row { font-weight: bold; }
+                                                                    </style>
+                                                                </head>
+                                                                <body>
+                                                                    ${content.innerHTML}
+                                                                    <div class="text-center mt-4 no-print">
+                                                                        <button class="btn btn-primary" onclick="window.print()">Print</button>
+                                                                        <button class="btn btn-secondary" onclick="window.close()">Close</button>
+                                                                    </div>
+                                                                </body>
+                                                                </html>
+                                                            `);
             printWindow.document.close();
         }
     }
@@ -2813,7 +2810,7 @@
 
     function downloadProforma(id) {
         // First get the invoice_id from income
-        fetch(`/manager/getIncome/${id}`)
+        fetch(`/manager/income/getIncome/${id}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.income && data.income.invoice_id) {
@@ -2846,25 +2843,16 @@
                 // Fetch income and invoice details
                 try {
                     const response = await fetch(
-                        `/manager/getIncome/${incomeId}`);
+                        `/manager/income/getIncome/${incomeId}`);
                     const data = await response.json();
 
-                    if (data.success && data.invoice) {
-                        const invoice = data.invoice;
-                        const income = data.income; // Get income data from response
-
-                        // Parse client details
-                        let clientDetails = invoice.client_details;
-                        if (typeof clientDetails === 'string') {
-                            try {
-                                clientDetails = JSON.parse(clientDetails);
-                            } catch (e) {
-                                console.error('Error parsing client_details:', e);
-                                clientDetails = {};
-                            }
-                        }
-
-                        const clientName = clientDetails?.name || 'Customer';
+                    if (data.success && (data.invoice || data.income)) {
+                        const invoice = data.invoice || {};
+                        const income = data.income;
+                        
+                        // Client details are already decoded by the controller
+                        const clientDetails = invoice.client_details || {};
+                        const clientName = clientDetails?.name || income?.party_name || 'Customer';
                         const clientEmail = clientDetails?.email || '';
 
                         // Set form values
@@ -2907,17 +2895,17 @@
                             invoice?.total_amount || invoice?.amount || 0;
                         const defaultMessage = `Dear ${clientName},
 
-                                ${invoiceType === 'proforma' ? 'Please find attached the proforma invoice' : 'Please find attached your invoice'} for ₹${parseFloat(amount).toFixed(2)}.
+                                    ${invoiceType === 'proforma' ? 'Please find attached the proforma invoice' : 'Please find attached your invoice'} for ₹${parseFloat(amount).toFixed(2)}.
 
-                                Invoice Details:
-                                - Invoice Number: ${invoice.invoice_number || ''}
-                                - Amount: ₹${parseFloat(amount).toFixed(2)}
-                                ${invoice.due_date ? `- Due Date: ${formattedDueDate}` : ''}
+                                    Invoice Details:
+                                    - Invoice Number: ${invoice.invoice_number || ''}
+                                    - Amount: ₹${parseFloat(amount).toFixed(2)}
+                                    ${invoice.due_date ? `- Due Date: ${formattedDueDate}` : ''}
 
-                                Please let us know if you have any questions.
+                                    Please let us know if you have any questions.
 
-                                Best regards,
-                                ${companyName}`;
+                                    Best regards,
+                                    ${companyName}`;
 
                         document.getElementById('send_message').value = defaultMessage;
 

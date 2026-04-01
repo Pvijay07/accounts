@@ -12,9 +12,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Tax;
 use App\Models\Invoice;
+use App\Models\Receipt;
 use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Traits\ManagesCompanies;
 use App\Exports\IncomeExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -194,16 +196,28 @@ class IncomeController extends Controller
   public function getIncomeDetails($id)
   {
     try {
-      $income = Income::with(['company', 'invoice'])->find($id);
+      $income = Income::with(['company', 'invoice.company', 'invoice.taxes'])->findOrFail($id);
+      
+      $invoice = $income->invoice;
+      // Eager load everything needed by JS
+      if ($invoice) {
+          if ($invoice->line_items && is_string($invoice->line_items)) {
+              $invoice->line_items = json_decode($invoice->line_items, true);
+          }
+          if ($invoice->client_details && is_string($invoice->client_details)) {
+              $invoice->client_details = json_decode($invoice->client_details, true);
+          }
+      }
 
       return response()->json([
         'success' => true,
         'income'  => $income,
+        'invoice' => $invoice,
       ]);
     } catch (\Exception $e) {
       return response()->json([
         'success' => false,
-        'message' => 'Income not found',
+        'message' => 'Income record not found or error loading details: ' . $e->getMessage(),
       ]);
     }
   }
@@ -636,84 +650,75 @@ class IncomeController extends Controller
   public function splitHistory($id)
   {
     try {
-      $expense = Income::with(['parent', 'children' => function ($query) {
-        $query->orderBy('created_at', 'desc');
-      }])->findOrFail($id);
+      $income = Income::with(['parent', 'children'])->findOrFail($id);
 
-      $data = [
+      // The current income might be the parent or a child
+      $rootId = $income->parent_id ?: $income->id;
+      $rootIncome = $income->parent_id ? $income->parent : $income;
+
+      // Get all parts of the split (including root if it was split)
+      $allSplits = Income::where('id', $rootId)
+        ->orWhere('parent_id', $rootId)
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+      return response()->json([
         'success' => true,
-        'current_expense' => [
-          'id' => $expense->id,
-          'planned_amount' => $expense->amount,
-          'status' => $expense->status,
-          'is_split' => $expense->is_split,
-          'parent_id' => $expense->parent_id,
-        ],
-        'parent_expense' => null,
-        'children' => []
-      ];
-
-      // If this expense has a parent, get parent details
-      if ($expense->parent_id) {
-        $parent = $expense->parent()->with('children')->first();
-        if ($parent) {
-          $data['parent_expense'] = [
-            'id' => $parent->id,
-            'expense_name' => $parent->expense_name,
-            'planned_amount' => $parent->amount,
-            'created_at' => $parent->created_at->format('Y-m-d H:i:s'),
-            'is_split' => $parent->is_split,
-          ];
-          $data['children'] = $parent->children->map(function ($child) {
-            return [
-              'id' => $child->id,
-              'expense_name' => $child->expense_name,
-              'planned_amount' => $child->amount,
-              'status' => $child->status,
-              'paid_date' => $child->paid_date,
-              'created_at' => $child->created_at->format('Y-m-d H:i:s'),
-            ];
-          });
-        }
-      } else if ($expense->is_split && $expense->children->count() > 0) {
-        // If this is a parent expense with children
-        $data['children'] = $expense->children->map(function ($child) {
+        'parent_expense' => $income->parent_id ? [
+          'id' => $rootIncome->id,
+          'planned_amount' => $rootIncome->amount,
+          'created_at' => $rootIncome->created_at->toIso8601String()
+        ] : null,
+        'children' => $allSplits->map(function ($split) {
           return [
-            'id' => $child->id,
-            'expense_name' => $child->expense_name,
-            'planned_amount' => $child->planned_amount,
-            'status' => $child->status,
-            'paid_date' => $child->paid_date,
-            'created_at' => $child->created_at->format('Y-m-d H:i:s'),
+            'id' => $split->id,
+            'planned_amount' => $split->amount,
+            'actual_amount' => $split->actual_amount,
+            'status' => $split->status,
+            'created_at' => $split->created_at->toIso8601String(),
+            'paid_date' => $split->paid_date,
+            'due_date' => $split->due_date
           ];
-        });
-      }
-
-      // Calculate summary
-      $originalAmount = $expense->parent_id ?
-        ($data['parent_expense']['planned_amount'] ?? $expense->planned_amount) :
-        $expense->planned_amount;
-
-      $totalPaid = collect($data['children'])->where('status', 'paid')->sum('planned_amount');
-      $totalBalance = collect($data['children'])->where('status', '!=', 'paid')->sum('planned_amount');
-
-      $summaryOriginal = $expense->schedule_amount ?: collect($data['children'])->sum('planned_amount');
-
-      $data['summary'] = [
-        'original_amount' => $summaryOriginal,
-        'total_paid' => $totalPaid,
-        'total_balance' => $totalBalance,
-        'split_count' => count($data['children']),
-      ];
-
-      return response()->json($data);
+        }),
+        'summary' => [
+          'original_amount' => $rootIncome->amount,
+          'total_paid' => $allSplits->where('status', 'paid')->sum('amount'),
+          'total_balance' => $allSplits->where('status', '!=', 'paid')->sum('amount'),
+          'split_count' => $allSplits->count()
+        ]
+      ]);
     } catch (\Exception $e) {
       return response()->json([
         'success' => false,
         'message' => 'Error loading split history: ' . $e->getMessage()
-      ], 500);
+      ]);
     }
   }
+
+  public function deleteReceipt($id)
+  {
+    try {
+      $receipt = Receipt::findOrFail($id);
+
+      // Delete file from storage
+      if (Storage::disk('public')->exists($receipt->file_path)) {
+        Storage::disk('public')->delete($receipt->file_path);
+      }
+
+      $receipt->delete();
+
+      return response()->json([
+        'success' => true,
+        'message' => 'Receipt deleted successfully'
+      ]);
+    } catch (\Exception $e) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Error deleting receipt: ' . $e->getMessage()
+      ]);
+    }
+  }
+
   public function update(Request $request, $id)
   {
     try {
@@ -1028,7 +1033,7 @@ class IncomeController extends Controller
       $gstTotal = 0;
       $tdsTotal = 0;
 
-      if ($income->taxes && count($income->taxes) > 0) {
+      if ($income->taxes && $income->taxes->count() > 0) {
         $gstItems = $income->taxes->filter(function ($tax) {
           return $tax->tax_type === 'gst';
         })->values()->toArray();
@@ -1541,9 +1546,9 @@ class IncomeController extends Controller
       // Process variables in message
       $message = $request->message;
       $message = str_replace('{client_name}', $clientDetails['name'] ?? 'Customer', $message);
-      $message = str_replace('{invoice_no}', $invoice->invoice_number, subject: $message);
+      $message = str_replace('{invoice_no}', $invoice->invoice_number, $message);
       $message = str_replace('{due_date}', $invoice->due_date ? date('d M, Y', strtotime($invoice->due_date)) : 'N/A', $message);
-      $message = str_replace('{amount}', number_format($invoice->total_amount, 2), $message);
+      $message = str_replace('{amount}', number_format((float)$invoice->amount, 2), $message);
       $message = str_replace('{company_name}', $invoice->company->name ?? '', $message);
 
       // Process subject variables
@@ -1673,10 +1678,10 @@ class IncomeController extends Controller
   public function getInvoiceDetails($id)
   {
     $invoice = Invoice::with(['company'])->findOrFail($id);
-    if ($invoice->line_items) {
+    if ($invoice->line_items && is_string($invoice->line_items)) {
       $invoice->line_items = json_decode($invoice->line_items, true);
     }
-    if ($invoice->client_details) {
+    if ($invoice->client_details && is_string($invoice->client_details)) {
       $invoice->client_details = json_decode($invoice->client_details, true);
     }
 

@@ -1,5 +1,75 @@
 @extends('Admin.layouts.app')
 @section('content')
+    <style>
+        #currencySelect, #editHeaderCurrency, #footerCurrencySelect, #editCurrencySelect {
+            height: 28px !important; 
+            font-size: 0.8rem !important; 
+            border-radius: 6px !important; 
+            background-color: #ffffff !important; 
+            cursor: pointer !important;
+            font-weight: 600 !important;
+            color: #2563eb !important;
+            border: 1.5px solid #d1d5db !important;
+            padding: 0 10px !important;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+            appearance: auto !important;
+            -webkit-appearance: auto !important;
+            width: auto !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            margin: 0 4px !important;
+        }
+        #currencySelect:hover, #editHeaderCurrency:hover, #footerCurrencySelect:hover, #editCurrencySelect:hover {
+            border-color: #2563eb !important;
+            background-color: #f8fafc !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        }
+        #currencySelect:focus, #editHeaderCurrency:focus, #footerCurrencySelect:focus, #editCurrencySelect:focus {
+            outline: none !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+        }
+
+        /* Spacing between spans and inputs in groups */
+        .input-group {
+            gap: 10px !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        .input-group > .input-group-text {
+            border-radius: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+            background-color: #f8fafc !important;
+            color: #64748b !important;
+            font-weight: 600 !important;
+            padding: 0 12px !important;
+            display: flex !important;
+            align-items: center !important;
+            min-width: 40px !important;
+            justify-content: center !important;
+        }
+
+        .input-group > .form-control, 
+        .input-group > .form-select {
+            border-radius: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+            transition: all 0.2s !important;
+        }
+
+        .input-group > .form-control:focus, 
+        .input-group > .form-select:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        /* Override Bootstrap's default joined layout */
+        .input-group > :not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+            margin-left: 0 !important;
+            border-radius: 8px !important;
+        }
+    </style>
     <section id="invoices-page" class="page">
         <div class="container-fluid">
             @php
@@ -119,8 +189,7 @@
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label small">Mobile Number</label>
-                                        <input type="number" class="form-control form-control-sm" name="mobile_number"
-                                            placeholder="Optional">
+                                        <input type="text" class="form-control form-control-sm" name="mobile_number" placeholder="Optional" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label small">Client GSTIN (optional)</label>
@@ -154,7 +223,7 @@
                                                     <option value="INR">INR</option>
                                                 </select> ]
                                             </div>
-                                            <div class="col-md-2">Total Amt</div>
+                                            <div class="col-md-2" id="headerAmtLabel">Total Amt ($)</div>
                                             <div class="col-md-1"></div>
                                         </div>
                                         <div id="lineItemsContainer">
@@ -296,13 +365,13 @@
                                         <!-- Currency Section - UPDATED to match screenshot -->
                                         <div id="currency_section"
                                             style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f8fafc;">
-                                            <h6 class="mb-3 small fw-bold">Currency Details</h6>
+                                            <h6 class="mb-3 small fw-bold hide-if-inr">Currency Details</h6>
                                             <div class="row g-3">
                                                 <!-- Amount in Foreign Currency -->
                                                 <div class="col-md-3 d-none">
                                                     <label class="form-label small">Currency</label>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-3 hide-if-inr">
                                                     <label class="form-label small">Amount In ($)</label>
                                                     <div class="input-group input-group-sm">
                                                         <span class="input-group-text" id="currencySymbol">$</span>
@@ -314,7 +383,7 @@
                                                     <small class="text-muted d-none" id="foreignAmountLabel"></small>
                                                 </div>
 
-                                                <div class="col-md-3">
+                                                <div class="col-md-3 hide-if-inr">
                                                     <label class="form-label small" id="rateLabelDisplay">USD to
                                                         INR</label>
                                                     <div class="input-group input-group-sm">
@@ -327,7 +396,7 @@
                                                     </div>
                                                 </div>
                                                 <!-- Amount in INR -->
-                                                <div class="col-md-3">
+                                                <div class="col-md-3 hide-if-inr">
                                                     <label class="form-label small">Amount in ₹</label>
                                                     <div class="input-group input-group-sm">
                                                         <span class="input-group-text">₹</span>
@@ -340,7 +409,7 @@
                                                     <small class="text-muted d-none" id="conversionDisplay"></small>
                                                 </div>
                                                 <!-- Conversion Rate -->
-                                                <div class="col-md-3">
+                                                <div class="col-md-3 hide-if-inr">
                                                     <label class="form-label small">Conversion Rate %</label>
                                                     <div class="input-group input-group-sm">
                                                         <input type="number" class="form-control form-control-sm"
@@ -355,7 +424,7 @@
                                                 </div>
 
                                                 <!-- Conversion Cost -->
-                                                <div class="col-md-3">
+                                                <div class="col-md-3 hide-if-inr">
                                                     <label class="form-label small">Conversion Cost</label>
                                                     <div class="input-group input-group-sm">
                                                         <span class="input-group-text">₹</span>
@@ -970,8 +1039,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label small">Mobile Number</label>
-                                <input type="number" class="form-control form-control-sm" name="mobile_number"
-                                    id="editMobileNumber">
+                                <input type="text" class="form-control form-control-sm" name="mobile_number" id="editMobileNumber" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label small">Client GSTIN (optional)</label>
@@ -994,6 +1062,20 @@
                                         onclick="addEditLineItem()">
                                         <i class="fas fa-plus"></i> Add Item
                                     </button>
+                                </div>
+                                <div id="editLineItemsHeader" class="row g-2 mb-2 fw-semibold small text-muted px-2 border-bottom pb-1">
+                                    <div class="col-md-4">Description</div>
+                                    <div class="col-md-2">Quantity</div>
+                                    <div class="col-md-2">Rate [
+                                        <select id="editHeaderCurrency" class="form-select form-select-sm d-inline-block w-auto py-0 px-2 fw-bold text-primary border"
+                                            style="height: 24px; font-size: 0.75rem; border-radius: 4px; background-color: #f8fafc; cursor: pointer; transition: all 0.2s;"
+                                            onchange="syncEditCurrency(this.value)">
+                                            <option value="USD">USD</option>
+                                            <option value="INR">INR</option>
+                                        </select> ]
+                                    </div>
+                                    <div class="col-md-2" id="headerAmtLabel">Total Amt ($)</div>
+                                    <div class="col-md-1"></div>
                                 </div>
                                 <div id="editLineItemsContainer">
                                     <!-- Line items will be dynamically added here -->
@@ -1097,7 +1179,7 @@
                                 <!-- Currency Section -->
                                 <div
                                     style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f8fafc;">
-                                    <h6 class="mb-3 small fw-bold">Currency Details</h6>
+                                    <h6 class="mb-3 small fw-bold hide-if-inr">Currency Details</h6>
                                     <div class="row g-3">
                                         <!-- Currency Selection -->
                                         <div class="col-md-3">
@@ -1547,10 +1629,45 @@ window.calculateTax = function() {
 
         // Currency conversion functions
         window.updateCurrencySelection = function() {
-            const currencySelect = document.getElementById('currencySelect');
-            const currency = currencySelect.value;
+            const headerSelect = document.getElementById('currencySelect');
+            const footerSelect = document.getElementById('footerCurrencySelect');
             
-            // Requirement 4: USD removes GST and TDS
+            if (headerSelect && footerSelect) {
+                if (window.event && window.event.target) {
+                    if (window.event.target.id === 'currencySelect') {
+                        footerSelect.value = headerSelect.value;
+                    } else if (window.event.target.id === 'footerCurrencySelect') {
+                        headerSelect.value = footerSelect.value;
+                    }
+                }
+            }
+
+            const currency = headerSelect ? headerSelect.value : 'USD';
+            
+            // Show/Hide Currency Details
+            const currencySection = document.getElementById('currency_section');
+            if (currencySection) {
+                const columns = currencySection.querySelectorAll('.col-md-3');
+                const header = currencySection.querySelector('h6');
+                if (currency === 'INR') {
+                    if (header) header.classList.add('d-none');
+                    columns.forEach(col => {
+                        if (!col.innerText.includes('Receivable Amt')) {
+                            col.classList.add('d-none');
+                        } else {
+                            col.classList.remove('d-none', 'col-md-3');
+                            col.classList.add('col-md-4');
+                        }
+                    });
+                } else {
+                    if (header) header.classList.remove('d-none');
+                    columns.forEach(col => {
+                        col.classList.remove('d-none', 'col-md-4');
+                        col.classList.add('col-md-3');
+                    });
+                }
+            }
+
             const gstSection = document.getElementById('gst_section');
             const tdsSection = document.getElementById('tds_section');
             const applyGST = document.getElementById('applyGST');
@@ -1564,42 +1681,15 @@ window.calculateTax = function() {
             } else {
                 if (gstSection) gstSection.classList.remove('d-none');
                 if (tdsSection) tdsSection.classList.remove('d-none');
-                // For INR, ensure GST/TDS are showing (user can still uncheck if needed)
                 if (applyGST) applyGST.checked = true;
-            }
-
-            // Requirement 3: INR simplify conversion block
-            const currencySectionRows = document.querySelectorAll('#currency_section .row.g-3 > .col-md-3');
-            if (currency === 'INR') {
-                currencySectionRows.forEach(col => {
-                    // Show only receivable amount
-                    if (col.querySelector('#receivable_amount_foreign')) {
-                        col.classList.remove('d-none');
-                    } else if (!col.classList.contains('d-none')) {
-                        // Mark as d-none if it's not the receivable column
-                        // (Amount In INR, Base Rate, conversion rate, conversion cost etc)
-                        // Note: we still keep the original hidden col-md-3 d-none
-                        const label = col.querySelector('label');
-                        if (label && label.textContent !== 'Currency') {
-                            col.classList.add('d-none-temp'); // Use a temp class to hide
-                            col.style.display = 'none';
-                        }
-                    }
-                });
-            } else {
-                // Show all for USD
-                currencySectionRows.forEach(col => {
-                    if (col.classList.contains('d-none-temp')) {
-                        col.classList.remove('d-none-temp');
-                        col.style.display = 'block';
-                    }
-                });
             }
 
             updateCurrencySymbols(currency);
             updateConversionRateForCurrency(currency);
             updateCurrencyConversionFromForeign();
-            calculateTax();
+            if (typeof calculateTax === 'function') {
+                calculateTax();
+            }
         }
 
         window.updateCurrencyConversionFromForeign = function() {
@@ -1693,6 +1783,11 @@ window.calculateTax = function() {
 
 
         function updateCurrencySymbols(currency) {
+            const headerAmtLabel = document.getElementById('headerAmtLabel');
+            if (headerAmtLabel) {
+                headerAmtLabel.textContent = `Total Amt (${currency === 'INR' ? '₹' : '$'})`;
+            }
+            
             const symbols = {
                 'INR': '₹',
                 'USD': '$',
@@ -3913,9 +4008,53 @@ window.calculateTax = function() {
         // Currency functions for edit form
         function updateEditCurrencySelection() {
             const currencySelect = document.getElementById('editCurrencySelect');
-            const currency = currencySelect.value;
+            const headerSelect = document.getElementById('editHeaderCurrency');
+            
+            if (currencySelect && headerSelect) {
+                if (window.event && window.event.target) {
+                    if (window.event.target.id === 'editHeaderCurrency') {
+                        currencySelect.value = headerSelect.value;
+                    } else if (window.event.target.id === 'editCurrencySelect') {
+                        headerSelect.value = currencySelect.value;
+                    }
+                }
+            }
+
+            const currency = currencySelect ? currencySelect.value : 'USD';
+            
+            // Show/Hide Edit Currency Details
+            const editCurrencySection = document.getElementById('edit_currency_section') || (document.querySelector('#editInvoiceModal h6.hide-if-inr') ? document.querySelector('#editInvoiceModal h6.hide-if-inr').parentElement : null);
+            if (editCurrencySection) {
+                const columns = editCurrencySection.querySelectorAll('.col-md-3');
+                const header = editCurrencySection.querySelector('h6');
+                if (currency === 'INR') {
+                    if (header) header.classList.add('d-none');
+                    columns.forEach(col => {
+                        if (!col.innerText.includes('Receivable Amt')) {
+                            col.classList.add('d-none');
+                        } else {
+                            col.classList.remove('d-none', 'col-md-3');
+                            col.classList.add('col-md-4');
+                        }
+                    });
+                } else {
+                    if (header) header.classList.remove('d-none');
+                    columns.forEach(col => {
+                        col.classList.remove('d-none', 'col-md-4');
+                        col.classList.add('col-md-3');
+                    });
+                }
+            }
+
             updateEditCurrencySymbols(currency);
             updateEditConversionRateForCurrency(currency);
+            if (typeof calculateEditTax === 'function') {
+                calculateEditTax();
+            }
+        }
+
+        function syncEditCurrency(val) {
+            updateEditCurrencySelection();
         }
 
         function updateEditConversionRateForCurrency(currency) {
@@ -3936,6 +4075,11 @@ window.calculateTax = function() {
         }
 
         function updateEditCurrencySymbols(currency) {
+            const editHeaderAmtLabel = document.getElementById('editHeaderAmtLabel');
+            if (editHeaderAmtLabel) {
+                editHeaderAmtLabel.textContent = `Total Amt (${currency === 'INR' ? '₹' : '$'})`;
+            }
+            
             const symbols = {
                 'INR': '₹',
                 'USD': '$',

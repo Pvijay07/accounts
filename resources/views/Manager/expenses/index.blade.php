@@ -2602,7 +2602,11 @@
         }
 
         if (expense.status) {
-            document.getElementById('editFixedStatus').value = expense.status;
+            let statusValue = expense.status;
+            if (['pending', 'upcoming', 'overdue'].includes(statusValue)) {
+                statusValue = 'due';
+            }
+            document.getElementById('editFixedStatus').value = statusValue;
         }
 
         if (expense.due_date) {
@@ -2817,7 +2821,11 @@
 
         // Set status and due date
         if (expense.status) {
-            document.getElementById('editFixedStatus').value = expense.status;
+            let statusValue = expense.status;
+            if (['pending', 'upcoming', 'overdue'].includes(statusValue)) {
+                statusValue = 'due';
+            }
+            document.getElementById('editEditableStatus').value = statusValue;
         }
 
         if (expense.due_date) {
@@ -2854,7 +2862,13 @@
         }
         document.getElementById('editPaidAmount').value = parseFloat(expense.planned_amount) - parseFloat(expense
             .tds_amount);
-        document.getElementById('editStatus').value = expense.status;
+        if (expense.status) {
+            let statusValue = expense.status;
+            if (['pending', 'upcoming', 'overdue'].includes(statusValue)) {
+                statusValue = 'due';
+            }
+            document.getElementById('editStatus').value = statusValue;
+        }
         document.getElementById('editPartyName').value = expense.party_name || '';
         document.getElementById('editMobileNumber').value = expense.mobile_number || '';
         document.getElementById('editNotes').value = expense.notes || '';

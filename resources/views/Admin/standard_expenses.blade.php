@@ -110,10 +110,7 @@
                             <label class="form-label"
                                 style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 13px;">Mobile
                                 Number</label>
-                            <input type="text" name="mobile_number" id="mobile_number" class="form-control"
-                                placeholder="Optional"
-                                style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;"
-                                maxlength="10" minlength="10">
+                            <input type="text" name="mobile_number" id="mobile_number" class="form-control" placeholder="Optional" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
                         <div class="form-group">
                             <label class="form-label"
@@ -1439,7 +1436,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 12px;">Mobile Number</label>
-                        <input type="number" name="mobile_number" id="edit_mobile_number" class="form-control" value="${expenseData.mobile_number || ''}" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" maxlength="10">
+                        <input type="text" name="mobile_number" id="edit_mobile_number" class="form-control" value="${expenseData.mobile_number || ''}" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                     </div>
                 </div>
 
