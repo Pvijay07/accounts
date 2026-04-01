@@ -111,6 +111,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/categories/bulk-update', [CategoryController::class, 'bulkUpdate'])->name('categories.bulk-update');
     });
 
+
+
+
 // Manager Routes
 Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('manager.dashboard');
@@ -138,7 +141,7 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
         Route::post('/send-email', [IncomeController::class, 'sendEmail'])->name('income.send-email');
     });
 
-// GST Routes
+    // GST Routes
     Route::prefix('gst')->group(function () {
         Route::get('/', [GstController::class, 'index'])->name('manager.gst');
     });

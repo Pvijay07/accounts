@@ -546,6 +546,40 @@ body {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="{{ asset('assets/main.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        @if ($errors->any())
+            let errorMessages = '';
+            @foreach ($errors->all() as $error)
+                errorMessages += '<li>{{ $error }}</li>';
+            @endforeach
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: '<ul style="text-align: left; margin-bottom: 0;">' + errorMessages + '</ul>',
+                confirmButtonColor: '#3b82f6',
+            });
+        @endif
+
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: '{{ session('success') }}',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        @endif
+        
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: '{{ session('error') }}',
+                confirmButtonColor: '#3b82f6',
+            });
+        @endif
+    </script>
 </body>
 
 </html>

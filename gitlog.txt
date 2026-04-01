@@ -1,0 +1,54 @@
+commit cda37b82794e3f088a9f79e18155f934b01dfcef
+Author: vijay <vijayrajpallapu3210@gmail.com>
+Date:   Tue Mar 31 16:02:50 2026 +0530
+
+    optimize-1
+
+M	app/Http/Controllers/Manager/ExpensesController.php
+M	app/Http/Controllers/Manager/IncomeController.php
+M	resources/views/Manager/dashboard.blade.php
+D	resources/views/Manager/expenses/non_standard.blade.php
+M	routes/web.php
+
+commit 47cd711362966c63789cf7cb6179167393d2ff61
+Author: vijay <vijayrajpallapu3210@gmail.com>
+Date:   Tue Mar 31 15:22:56 2026 +0530
+
+    optimize
+
+D	app/Exports/DetailedReportExport.php
+A	app/Exports/ExpenseExport.php
+A	app/Exports/GstExport.php
+A	app/Exports/IncomeExport.php
+D	app/Exports/ReportExport.php
+A	app/Exports/TdsExport.php
+M	app/Http/Controllers/Manager/DashboardController.php
+D	app/Http/Controllers/Manager/ExpenseTypeController.php
+M	app/Http/Controllers/Manager/ExpensesController.php
+M	app/Http/Controllers/Manager/GstController.php
+M	app/Http/Controllers/Manager/IncomeController.php
+D	app/Http/Controllers/Manager/InvoiceController.php
+D	app/Http/Controllers/Manager/NonStandardExpensesController.php
+D	app/Http/Controllers/Manager/ReportController.php
+D	app/Http/Controllers/Manager/StandardExpensesController.php
+M	app/Http/Controllers/Manager/TDSController.php
+A	app/Traits/ManagesCompanies.php
+M	resources/views/Admin/dashboard.blade.php
+D	resources/views/Manager/analysis/reports.blade.php
+D	resources/views/Manager/audit_logs.blade.php
+D	resources/views/Manager/company.blade.php
+D	resources/views/Manager/data/import.blade.php
+D	resources/views/Manager/expense_generation_logs.blade.php
+D	resources/views/Manager/expense_types.blade.php
+A	resources/views/Manager/exports/expense_pdf.blade.php
+A	resources/views/Manager/exports/gst_pdf.blade.php
+A	resources/views/Manager/exports/income_pdf.blade.php
+A	resources/views/Manager/exports/tds_pdf.blade.php
+D	resources/views/Manager/invoices.blade.php
+M	resources/views/Manager/layouts/app.blade.php
+D	resources/views/Manager/reports.blade.php
+D	resources/views/Manager/standard_expenses.blade.php
+D	resources/views/Manager/system/notifications.blade.php
+D	resources/views/Manager/system_settings.blade.php
+D	resources/views/Manager/users.blade.php
+M	routes/web.php
