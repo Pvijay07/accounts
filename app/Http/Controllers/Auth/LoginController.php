@@ -10,9 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    public function showLoginForm()
+    public function showAdminLoginForm()
     {
-        return view('auth.login');
+        return view('auth.admin-login');
+    }
+
+    public function showManagerLoginForm()
+    {
+        return view('auth.manager-login');
     }
 
     public function login(Request $request)
@@ -41,6 +46,24 @@ class LoginController extends Controller
                 'email' => __('Your account has been deactivated. Please contact administrator.'),
             ]);
         }
+
+        // --- Role-based entry validation ---
+        $role = strtolower($user->role);
+        $isAdmin = in_array($role, ['admin', 'super admin']);
+        $isManager = ($role === 'manager');
+        
+        if ($request->is('admin/*') && !$isAdmin) {
+            throw ValidationException::withMessages([
+                'email' => __('This portal is for administrators only.'),
+            ]);
+        }
+
+        if ($request->is('manager/*') && !$isManager) {
+            throw ValidationException::withMessages([
+                'email' => __('This portal is for managers only.'),
+            ]);
+        }
+        // ------------------------------------
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
@@ -72,7 +95,7 @@ class LoginController extends Controller
         }
 
         // Redirect based on user role
-        switch ($user->role) {
+        switch (strtolower($user->role)) {
             case 'admin':
                 return redirect()->intended('/admin/dashboard');
             case 'manager':
@@ -88,12 +111,20 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $role = Auth::user() ? strtolower(Auth::user()->role) : null;
+
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        if ($role === 'admin') {
+            return redirect('/admin/login');
+        } elseif ($role === 'manager') {
+            return redirect('/manager/login');
+        }
+
+        return redirect('/admin/login'); // Default fallback
     }
 
     protected function logLoginAttempt(Request $request, $status, $user = null)

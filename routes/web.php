@@ -25,8 +25,13 @@ use App\Http\Controllers\Manager\TDSController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication Routes
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
+// Separate Logins
+Route::get('/admin/login', [LoginController::class, 'showAdminLoginForm'])->name('admin.login');
+Route::post('/admin/login', [LoginController::class, 'login']);
+
+Route::get('/manager/login', [LoginController::class, 'showManagerLoginForm'])->name('manager.login');
+Route::post('/manager/login', [LoginController::class, 'login']);
+
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Admin Routes

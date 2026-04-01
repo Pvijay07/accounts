@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Manager - Login</title>
+    <title>Admin Login - Finance Manager</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -443,7 +443,7 @@
             </div>
 
             <h1 class="welcome-text">
-                Welcome to Your Complete Accounting Solution
+                Administrator Access - Finance Manager
             </h1>
 
             <ul class="features">
@@ -473,7 +473,7 @@
         <!-- Right Side - Login Form -->
         <div class="login-right">
             <div class="login-header">
-                <h2 class="login-title">Sign In</h2>
+                <h2 class="login-title">Admin Sign In</h2>
                 <p class="login-subtitle">Enter your credentials to access your account</p>
             </div>
 
@@ -502,7 +502,7 @@
                 </div>
             @endif
 
-            <form id="login-form" method="POST" action="{{ route('login') }}">
+            <form id="login-form" method="POST" action="{{ route('admin.login') }}">
                 @csrf
 
                 <div class="form-group">
