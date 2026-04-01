@@ -6,18 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Login - Finance Manager</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #3498db;
-            --primary-dark: #2980b9;
-            --secondary: #2c3e50;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
-            --gray: #95a5a6;
-            --border: #bdc3c7;
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #1e1b4b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --gray: #64748b;
+            --border: #e2e8f0;
         }
 
         * {
@@ -27,8 +28,8 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -49,7 +50,7 @@
 
         .login-left {
             flex: 1;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, var(--secondary) 0%, #0f172a 100%);
             color: white;
             padding: 50px;
             display: flex;
@@ -57,6 +58,7 @@
             justify-content: center;
             position: relative;
             overflow: hidden;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .login-left::before {
@@ -479,27 +481,27 @@
 
             <!-- Error/Success Messages -->
             @if ($errors->any())
-                <div class="alert alert-error" id="error-alert" style="display: block;">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span id="error-message">{{ $errors->first() }}</span>
-                </div>
+            <div class="alert alert-error" id="error-alert" style="display: block;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="error-message">{{ $errors->first() }}</span>
+            </div>
             @else
-                <div class="alert alert-error" id="error-alert">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span id="error-message">Invalid credentials. Please try again.</span>
-                </div>
+            <div class="alert alert-error" id="error-alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="error-message">Invalid credentials. Please try again.</span>
+            </div>
             @endif
 
             @if (session('status'))
-                <div class="alert alert-success" id="success-alert" style="display: block;">
-                    <i class="fas fa-check-circle"></i>
-                    <span id="success-message">{{ session('status') }}</span>
-                </div>
+            <div class="alert alert-success" id="success-alert" style="display: block;">
+                <i class="fas fa-check-circle"></i>
+                <span id="success-message">{{ session('status') }}</span>
+            </div>
             @else
-                <div class="alert alert-success" id="success-alert">
-                    <i class="fas fa-check-circle"></i>
-                    <span id="success-message">Login successful! Redirecting...</span>
-                </div>
+            <div class="alert alert-success" id="success-alert">
+                <i class="fas fa-check-circle"></i>
+                <span id="success-message">Login successful! Redirecting...</span>
+            </div>
             @endif
 
             <form id="login-form" method="POST" action="{{ route('manager.login') }}">

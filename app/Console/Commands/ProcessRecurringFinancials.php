@@ -35,6 +35,7 @@ class ProcessRecurringFinancials extends Command
         
         $this->processRecurringInvoices();
         $this->processStandardExpenses();
+        $this->processRecurringIncomes();
         
         $this->info('Recurring financials processing completed.');
     }
@@ -93,6 +94,32 @@ class ProcessRecurringFinancials extends Command
     }
 
     /**
+     * Process recurring incomes.
+     */
+    private function processRecurringIncomes()
+    {
+        $this->info('Processing recurring incomes...');
+        
+        $today = Carbon::today();
+        
+        // Templates are entries with a frequency and source='standard'
+        $templates = Income::where('source', 'standard')
+            ->whereNotNull('frequency')
+            ->get();
+
+        foreach ($templates as $template) {
+            try {
+                if ($this->shouldGenerateForDate($template, $today)) {
+                    $this->generateIncome($template, $today);
+                }
+            } catch (\Exception $e) {
+                Log::error("Error generating recurring income for template ID {$template->id}: " . $e->getMessage());
+                $this->error("Error for Income {$template->id}: {$e->getMessage()}");
+            }
+        }
+    }
+
+    /**
      * Determine if a new record should be generated today based on freq and due_day.
      */
     private function shouldGenerateForDate($template, Carbon $date)
@@ -106,30 +133,34 @@ class ProcessRecurringFinancials extends Command
         switch ($frequency) {
             case 'monthly':
                 // Check if today matches the due day
-                // and if it hasn't been generated yet for this month
                 if ($date->day == $dueDay) {
                     return !$this->alreadyGenerated($template, $date, 'month');
                 }
                 break;
             
             case 'quarterly':
-                // Months: 1, 4, 7, 10
+                // Months: 1, 4, 7, 10 (Standard quarterly start months)
                 if (in_array($date->month, [1, 4, 7, 10]) && $date->day == $dueDay) {
                     return !$this->alreadyGenerated($template, $date, 'quarter');
                 }
                 break;
 
             case 'yearly':
-                // Assume generated once a year on the month set in issue_date or just month 1
-                $targetMonth = $template->issue_date ? $template->issue_date->month : 1;
+                // Assume generated once a year. If issue_date exists, use its month, else month 1.
+                $targetMonth = 1;
+                if ($template instanceof Invoice && $template->issue_date) {
+                    $targetMonth = $template->issue_date->month;
+                } elseif ($template instanceof Income && $template->income_date) {
+                    $targetMonth = $template->income_date->month;
+                }
+                
                 if ($date->month == $targetMonth && $date->day == $dueDay) {
                     return !$this->alreadyGenerated($template, $date, 'year');
                 }
                 break;
 
             case 'weekly':
-                // For weekly, we check if today is the day of the week
-                // (Assuming due_day 1-7 represents Mon-Sun)
+                // 1-7 represents Mon-Sun
                 if ($date->dayOfWeekIso == $dueDay) {
                     return !$this->alreadyGenerated($template, $date, 'week');
                 }
@@ -147,14 +178,16 @@ class ProcessRecurringFinancials extends Command
         $query = null;
         
         if ($template instanceof Invoice) {
-            // Check for other invoices originating from this one (parent_id or similar)
-            // If the schema doesn't have parent_id, we check by similarity
             $query = Invoice::where('company_id', $template->company_id)
-                ->where('is_recurring', false); // The child is not a template
-        } else {
+                ->where('is_recurring', false); 
+        } elseif ($template instanceof Expense) {
             $query = Expense::where('company_id', $template->company_id)
                 ->where('expense_name', $template->expense_name)
-                ->where('source', '!=', 'standard');
+                ->where('is_recurring', false);
+        } elseif ($template instanceof Income) {
+            $query = Income::where('company_id', $template->company_id)
+                ->where('party_name', $template->party_name)
+                ->where('source', '!=', 'standard'); // Standard is for templates
         }
 
         if (!$query) return false;
@@ -212,7 +245,7 @@ class ProcessRecurringFinancials extends Command
     {
         DB::transaction(function () use ($template, $date) {
             $newExpense = $template->replicate();
-            $newExpense->source = 'manual'; // Real expense
+            $newExpense->source = 'manual'; 
             $newExpense->is_recurring = false;
             $newExpense->due_date = $date;
             $newExpense->status = 'pending';
@@ -227,6 +260,31 @@ class ProcessRecurringFinancials extends Command
             }
 
             $this->info("Generated Expense: {$newExpense->expense_name} for {$date->format('M Y')}");
+        });
+    }
+
+    /**
+     * Generate a new Income from template.
+     */
+    private function generateIncome(Income $template, Carbon $date)
+    {
+        DB::transaction(function () use ($template, $date) {
+            $newIncome = $template->replicate();
+            $newIncome->source = 'manual';
+            $newIncome->income_date = $date;
+            $newIncome->due_date = $date->copy()->addDays(5);
+            $newIncome->status = 'pending';
+            $newIncome->parent_id = $template->id;
+            $newIncome->save();
+
+            // Replicate taxes
+            foreach ($template->taxes as $tax) {
+                $newTax = $tax->replicate();
+                $newTax->taxable_id = $newIncome->id;
+                $newTax->save();
+            }
+
+            $this->info("Generated Income: {$newIncome->party_name} for {$date->format('M Y')}");
         });
     }
 }
